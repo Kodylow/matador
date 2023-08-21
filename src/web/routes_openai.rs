@@ -1,14 +1,14 @@
 use crate::services::openai::{
     self, OpenAI, CHAT_COMPLETIONS, IMAGE_GENERATIONS, MODEL_LIST, MODEL_RETRIEVE,
 };
-use crate::{services, Error, Result};
+use crate::{services, Result};
 use axum::extract::Path;
 use axum::Json;
 use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 

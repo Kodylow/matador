@@ -1,13 +1,11 @@
 pub use self::error::{Error, Result};
 
 use axum::Router;
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 
 mod error;
 mod services;
 mod web;
-
-use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() -> Result<()> {

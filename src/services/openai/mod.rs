@@ -1,14 +1,11 @@
 use crate::{Error, Result};
-use axum::http::HeaderMap;
-use reqwest::{
-    header::{AUTHORIZATION, CONTENT_TYPE},
-    Client,
-};
+
+use reqwest::Client;
 use serde_json::Value;
-use std::{env, sync::Arc};
+use std::sync::Arc;
 
 use lazy_static::lazy_static;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::Mutex;
 
 pub mod types;
