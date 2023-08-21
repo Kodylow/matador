@@ -3,7 +3,7 @@ use crate::{Error, Result};
 use reqwest::Client;
 use serde_json::Value;
 use std::sync::Arc;
-use tracing::{info, trace};
+use tracing::{trace};
 
 use lazy_static::lazy_static;
 use serde::{de::DeserializeOwned, Serialize};
