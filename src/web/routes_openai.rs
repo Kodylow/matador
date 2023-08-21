@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::services::openai::OpenAI;
+use crate::services::openai::{self, OpenAI};
 use crate::{services, Error, Result};
 use axum::extract::{Path, State};
 use axum::{routing, Json, Router};
@@ -17,6 +17,12 @@ pub fn routes() -> Router {
         .route(
             "/v1/models",
             routing::get(list_models).with_state(AppState {
+                openai: OpenAI::get_instance(),
+            }),
+        )
+        .route(
+            "/v1/chat/completions",
+            routing::post(chat_completion_create).with_state(AppState {
                 openai: OpenAI::get_instance(),
             }),
         )
@@ -43,4 +49,15 @@ pub async fn retrieve_model(
     let openai = app_state.openai.lock().await;
     let model = openai.model_retrieve(&model_id).await?;
     Ok(Json(model))
+}
+
+#[axum::debug_handler]
+pub async fn chat_completion_create(
+    State(app_state): State<AppState>,
+    Json(req): Json<openai::types::ChatCompletionRequest>,
+) -> Result<Json<openai::types::ChatCompletionResponse>> {
+    let openai = app_state.openai.lock().await;
+    let response = openai.create_chat_completion(req).await?;
+    println!("response: {:?}", response);
+    Ok(Json(response))
 }

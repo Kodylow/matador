@@ -4,7 +4,10 @@ use serde_json::Value;
 use std::{env, sync::Arc};
 
 use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
+
+pub mod types;
 
 lazy_static! {
     static ref OPENAI_CLIENT: Arc<Mutex<OpenAI>> = Arc::new(Mutex::new(OpenAI::new()));
@@ -47,6 +50,24 @@ impl OpenAI {
             .unwrap();
 
         let value: Value = res.json().await.unwrap();
+        Ok(value)
+    }
+
+    pub async fn create_chat_completion(
+        &self,
+        req: types::ChatCompletionRequest,
+    ) -> Result<types::ChatCompletionResponse> {
+        let url = "https://api.openai.com/v1/chat/completions";
+        let res = self
+            .client
+            .post(url)
+            .bearer_auth(&self.api_key)
+            .json(&req)
+            .send()
+            .await
+            .unwrap();
+
+        let value: types::ChatCompletionResponse = res.json().await.unwrap();
         Ok(value)
     }
 }
