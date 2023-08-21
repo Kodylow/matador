@@ -1,4 +1,4 @@
-use crate::{services::openai::types::FileDeletionResponse, Error, Result};
+use crate::{Error, Result};
 
 use reqwest::Client;
 use serde_json::Value;
@@ -41,7 +41,7 @@ impl OpenAI {
         let api_key =
             dotenv::var("OPENAI_API_KEY").unwrap_or_else(|_| panic!("OPENAI_API_KEY must be set"));
         let client = Client::new();
-        let api_base = "https://api.openai.com/v1".to_string();
+        let api_base = "https://api.openai.com".to_string();
         trace!("OpenAI instance created");
         OpenAI {
             client,
@@ -63,7 +63,11 @@ impl OpenAI {
 
     pub async fn model_retrieve(&self, model_id: &str) -> Result<Value> {
         trace!("Retrieving model {}", model_id);
-        let url = format!("{}{}{}", self.api_base, MODEL_RETRIEVE, model_id);
+        let url = format!(
+            "{}{}",
+            self.api_base,
+            MODEL_RETRIEVE.replace(":model_id", model_id)
+        );
         self.send_get_request(&url).await
     }
 
@@ -141,19 +145,23 @@ impl OpenAI {
 
     pub async fn delete_file(&self, file_id: &str) -> Result<types::FileDeletionResponse> {
         trace!("Deleting file {}", file_id);
-        let url = format!("{}{}/{}", self.api_base, FILES, file_id);
+        let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
         self.send_delete_request(&url).await
     }
 
     pub async fn retrieve_file(&self, file_id: &str) -> Result<types::FileResponse> {
         trace!("Retrieving file {}", file_id);
-        let url = format!("{}{}/{}", self.api_base, FILES, file_id);
+        let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
         self.send_get_request(&url).await
     }
 
     pub async fn retrieve_file_content(&self, file_id: &str) -> Result<types::FileContentResponse> {
         trace!("Retrieving file content {}", file_id);
-        let url = format!("{}{}/{}/content", self.api_base, FILES, file_id);
+        let url = format!(
+            "{}{}",
+            self.api_base,
+            FILE_CONTENT.replace(":file_id", file_id)
+        );
         self.send_get_request(&url).await
     }
 
@@ -177,7 +185,7 @@ impl OpenAI {
         Ok(value)
     }
 
-    async fn send_post_request<T: Serialize, R: DeserializeOwned>(
+    async fn send_post_request<T: Serialize + std::fmt::Debug, R: DeserializeOwned>(
         &self,
         url: &str,
         req: &T,
@@ -191,6 +199,8 @@ impl OpenAI {
             .send()
             .await;
 
+        println!("Request: {:?}", req);
+        // println!("Response: {:?}", res);
         let value: R = match res {
             Ok(res) => {
                 trace!("POST request successful");
