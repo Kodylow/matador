@@ -1,5 +1,9 @@
 use crate::{Error, Result};
-use reqwest::Client;
+use axum::http::HeaderMap;
+use reqwest::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    Client,
+};
 use serde_json::Value;
 use std::{env, sync::Arc};
 
@@ -69,5 +73,32 @@ impl OpenAI {
 
         let value: types::ChatCompletionResponse = res.json().await.unwrap();
         Ok(value)
+    }
+
+    pub async fn create_image(
+        &self,
+        req: types::ImageCreationRequest,
+    ) -> Result<types::ImageCreationResponse> {
+        let url = "https://api.openai.com/v1/images/generations";
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
+        headers.insert(
+            AUTHORIZATION,
+            format!("Bearer {}", &self.api_key).parse().unwrap(),
+        );
+        let res = self.client.post(url).json(&req).send().await;
+        match res {
+            Ok(response) => {
+                println!("Response Status: {}", response.status());
+                println!("Response Headers: {:?}", response.headers());
+                let value: types::ImageCreationResponse = response.json().await.unwrap();
+                Ok(value)
+            }
+            Err(e) => {
+                println!("Error occurred: {:?}", e);
+                panic!("Error occurred: {:?}", e);
+                // Err(e.into())
+            }
+        }
     }
 }

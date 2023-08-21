@@ -82,3 +82,23 @@ pub struct ChoiceChunk {
 pub struct Delta {
     content: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImageCreationRequest {
+    prompt: String,
+    n: Option<i32>,
+    size: Option<String>,
+    response_format: Option<String>,
+    user: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ImageCreationResponse {
+    created: String,
+    data: Vec<ImageData>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ImageData {
+    url: String,
+}

@@ -32,6 +32,12 @@ pub fn routes() -> Router {
                 openai: OpenAI::get_instance(),
             }),
         )
+        .route(
+            "/v1/images/generations",
+            routing::post(image_create).with_state(AppState {
+                openai: OpenAI::get_instance(),
+            }),
+        )
 }
 
 #[axum::debug_handler]
@@ -58,6 +64,15 @@ pub async fn chat_completion_create(
 ) -> Result<Json<openai::types::ChatCompletionResponse>> {
     let openai = app_state.openai.lock().await;
     let response = openai.create_chat_completion(req).await?;
-    println!("response: {:?}", response);
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn image_create(
+    State(app_state): State<AppState>,
+    Json(req): Json<openai::types::ImageCreationRequest>,
+) -> Result<Json<openai::types::ImageCreationResponse>> {
+    let openai = app_state.openai.lock().await;
+    let response = openai.create_image(req).await?;
     Ok(Json(response))
 }
