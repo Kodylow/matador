@@ -1,5 +1,6 @@
 use crate::services::openai::{
-    self, OpenAI, CHAT_COMPLETIONS, IMAGE_GENERATIONS, MODEL_LIST, MODEL_RETRIEVE,
+    self, OpenAI, CHAT_COMPLETIONS, EMBEDDINGS, FILE, FILES, IMAGE_EDITS, IMAGE_GENERATIONS,
+    IMAGE_VARIATIONS, MODEL_LIST, MODEL_RETRIEVE, TRANSCRIPTIONS, TRANSLATIONS,
 };
 use crate::{services, Result};
 use axum::extract::Path;
@@ -39,6 +40,13 @@ pub fn routes() -> Router {
         .route(CHAT_COMPLETIONS, post(chat_completion_create))
         .route(MODEL_RETRIEVE, get(retrieve_model))
         .route(IMAGE_GENERATIONS, post(image_create))
+        .route(IMAGE_EDITS, post(image_edit))
+        .route(IMAGE_VARIATIONS, post(image_variation))
+        .route(EMBEDDINGS, post(embeddings_create))
+        .route(TRANSCRIPTIONS, post(transcription_create))
+        .route(TRANSLATIONS, post(translation_create))
+        .route(FILES, get(files_list).post(file_upload))
+        .route(FILE, get(file_retrieve).delete(file_delete))
         // Add middleware that inserts the state into all incoming request's
         // extensions.
         .layer(Extension(app_state))
@@ -78,9 +86,118 @@ pub async fn chat_completion_create(
 pub async fn image_create(
     app_state: Extension<AppState>,
     Json(req): Json<openai::types::ImageCreationRequest>,
-) -> Result<Json<openai::types::ImageCreationResponse>> {
+) -> Result<Json<openai::types::ImageResponse>> {
     info!("Calling route: image_create");
     let openai = app_state.get_openai().await;
     let response = openai.create_image(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn image_edit(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::ImageEditRequest>,
+) -> Result<Json<openai::types::ImageResponse>> {
+    info!("Calling route: image_edit");
+    let openai = app_state.get_openai().await;
+    let response = openai.edit_image(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn image_variation(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::ImageVariationRequest>,
+) -> Result<Json<openai::types::ImageResponse>> {
+    info!("Calling route: image_vary");
+    let openai = app_state.get_openai().await;
+    let response = openai.vary_image(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn embeddings_create(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::EmbeddingRequest>,
+) -> Result<Json<openai::types::EmbeddingResponse>> {
+    info!("Calling route: embeddings");
+    let openai = app_state.get_openai().await;
+    let response = openai.create_embeddings(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn transcription_create(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::AudioRequest>,
+) -> Result<Json<openai::types::AudioResponse>> {
+    info!("Calling route: transcription_create");
+    let openai = app_state.get_openai().await;
+    let response = openai.create_transcription(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn translation_create(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::AudioRequest>,
+) -> Result<Json<openai::types::AudioResponse>> {
+    info!("Calling route: translation_create");
+    let openai = app_state.get_openai().await;
+    let response = openai.create_translation(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn files_list(
+    app_state: Extension<AppState>,
+) -> Result<Json<openai::types::FileListResponse>> {
+    info!("Calling route: files_list");
+    let openai = app_state.get_openai().await;
+    let response = openai.list_files().await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn file_upload(
+    app_state: Extension<AppState>,
+    Json(req): Json<openai::types::FileUploadRequest>,
+) -> Result<Json<openai::types::FileResponse>> {
+    info!("Calling route: file_upload");
+    let openai = app_state.get_openai().await;
+    let response = openai.upload_file(req).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn file_delete(
+    app_state: Extension<AppState>,
+    Path(file_id): Path<String>,
+) -> Result<Json<openai::types::FileDeletionResponse>> {
+    info!("Calling route: file_delete {}", file_id);
+    let openai = app_state.get_openai().await;
+    let response = openai.delete_file(&file_id).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn file_retrieve(
+    app_state: Extension<AppState>,
+    Path(file_id): Path<String>,
+) -> Result<Json<openai::types::FileResponse>> {
+    info!("Calling route: file_retrieve {}", file_id);
+    let openai = app_state.get_openai().await;
+    let response = openai.retrieve_file(&file_id).await?;
+    Ok(Json(response))
+}
+
+#[axum::debug_handler]
+pub async fn file_retrieve_content(
+    app_state: Extension<AppState>,
+    Path(file_id): Path<String>,
+) -> Result<Json<openai::types::FileContentResponse>> {
+    info!("Calling route: file_retrieve_content {}", file_id);
+    let openai = app_state.get_openai().await;
+    let response = openai.retrieve_file_content(&file_id).await?;
     Ok(Json(response))
 }
