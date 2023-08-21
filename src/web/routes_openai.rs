@@ -11,6 +11,7 @@ use axum::{
 use serde_json::Value;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tracing::{info, trace};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -19,16 +20,19 @@ pub struct AppState {
 
 impl AppState {
     fn new() -> Self {
+        info!("Creating new AppState");
         AppState {
             openai: OpenAI::get_instance(),
         }
     }
     async fn get_openai(&self) -> tokio::sync::MutexGuard<'_, services::openai::OpenAI> {
+        trace!("Getting OpenAI instance");
         self.openai.lock().await
     }
 }
 
 pub fn routes() -> Router {
+    info!("Setting up routes");
     let app_state = Arc::new(AppState::new());
     Router::new()
         .route(MODEL_LIST, get(list_models))
@@ -42,6 +46,7 @@ pub fn routes() -> Router {
 
 #[axum::debug_handler]
 pub async fn list_models(app_state: Extension<AppState>) -> Result<Json<Value>> {
+    info!("Calling route: list_models");
     let openai = app_state.get_openai().await;
     let models = openai.model_list().await?;
     Ok(Json(models))
@@ -52,6 +57,7 @@ pub async fn retrieve_model(
     app_state: Extension<AppState>,
     Path(model_id): Path<String>,
 ) -> Result<Json<Value>> {
+    info!("Calling route: retrieve_model {}", model_id);
     let openai = app_state.get_openai().await;
     let model = openai.model_retrieve(&model_id).await?;
     Ok(Json(model))
@@ -62,6 +68,7 @@ pub async fn chat_completion_create(
     app_state: Extension<AppState>,
     Json(req): Json<openai::types::ChatCompletionRequest>,
 ) -> Result<Json<openai::types::ChatCompletionResponse>> {
+    info!("Calling route: chat_completion_create");
     let openai = app_state.get_openai().await;
     let response = openai.create_chat_completion(req).await?;
     Ok(Json(response))
@@ -72,6 +79,7 @@ pub async fn image_create(
     app_state: Extension<AppState>,
     Json(req): Json<openai::types::ImageCreationRequest>,
 ) -> Result<Json<openai::types::ImageCreationResponse>> {
+    info!("Calling route: image_create");
     let openai = app_state.get_openai().await;
     let response = openai.create_image(req).await?;
     Ok(Json(response))
