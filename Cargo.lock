@@ -641,6 +641,7 @@ dependencies = [
  "axum",
  "httpc-test",
  "lazy-regex",
+ "lazy_static",
  "once_cell",
  "reqwest",
  "serde",
