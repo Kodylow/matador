@@ -11,6 +11,7 @@ mod web;
 #[tokio::main]
 async fn main() -> Result<()> {
     // region:   --- Start Server
+    tracing_subscriber::fmt::init();
     let router = Router::new().nest("/openai", web::routes_openai::routes());
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("Server listening on {addr}");
