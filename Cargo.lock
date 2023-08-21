@@ -641,6 +641,8 @@ dependencies = [
  "axum",
  "httpc-test",
  "lazy-regex",
+ "once_cell",
+ "reqwest",
  "serde",
  "serde_json",
  "strum_macros",

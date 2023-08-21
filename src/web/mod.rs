@@ -1,5 +1,9 @@
 pub mod middleware_auth;
-pub mod routes_login;
-pub mod routes_tickets;
+pub mod routes_openai;
+use once_cell::sync::Lazy;
+use std::env;
 
-pub const AUTH_TOKEN: &str = "auth-token";
+// read the env vars in and set OPENAI_API_KEY
+
+pub static OPENAI_API_KEY: Lazy<String> =
+    Lazy::new(|| env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY must be set"));
