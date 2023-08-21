@@ -44,7 +44,7 @@ async fn quick_dev() -> Result<()> {
     // list tickets
     hc.do_get("/api/tickets").await?.print().await?;
 
-    // delete ticket 
+    // delete ticket
     hc.do_delete("/api/tickets/0").await?.print().await?;
 
     // endregion: -- tickets tests
