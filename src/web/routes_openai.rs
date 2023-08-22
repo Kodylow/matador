@@ -3,14 +3,14 @@ use crate::services::openai::{
     IMAGE_GENERATIONS, IMAGE_VARIATIONS, MODEL_LIST, MODEL_RETRIEVE, TRANSCRIPTIONS, TRANSLATIONS,
 };
 use crate::{services, Result};
-use axum::extract::{DefaultBodyLimit, Multipart, Path};
+use axum::extract::{DefaultBodyLimit, Path};
 use axum::Json;
 use axum::{
     routing::{get, post},
     Extension, Router,
 };
 use serde_json::Value;
-use std::collections::HashMap;
+
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, trace};
