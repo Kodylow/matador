@@ -7,6 +7,8 @@ pub struct LightningAddress {
     callback: String,
 }
 
+use lightning_invoice::{Bolt11Invoice, SignedRawBolt11Invoice};
+
 impl LightningAddress {
     pub async fn new(lnaddress: &str) -> Self {
         let (username, domain) = parse_lnaddress(lnaddress);
@@ -46,7 +48,7 @@ impl LightningAddress {
         serde_json::from_str(&res.text().await.unwrap()).expect("Failed to parse response")
     }
 
-    pub async fn get_invoice(&self) -> String {
+    pub async fn get_invoice(&self) -> Bolt11Invoice {
         let client = Client::new();
         let callback_res = client
             .get(format!("{}?amount=1000", self.callback))
@@ -57,7 +59,7 @@ impl LightningAddress {
         let response: CallbackResponse = serde_json::from_str(&callback_res.text().await.unwrap())
             .expect("Failed to parse callback response");
 
-        response.pr // assuming pr field contains the invoice
+        Bolt11Invoice::from_signed(response.pr.parse::<SignedRawBolt11Invoice>().unwrap()).unwrap()
     }
 }
 
