@@ -12,7 +12,9 @@ mod web;
 async fn main() -> Result<()> {
     // region:   --- Start Server
     tracing_subscriber::fmt::init();
-    let router = Router::new().nest("/openai", web::routes_openai::routes());
+    let router = Router::new()
+        .nest("/openai", web::routes_openai::routes())
+        .nest("/clipdrop", web::routes_clipdrop::routes());
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("Server listening on {addr}");
     axum::Server::bind(&addr)
