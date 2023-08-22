@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 uuid = { version = "1.4.1", features = ["v4", "fast-rng"] }
 anyhow = "1.0.75"
-axum = { version = "0.6.20", features = ["macros", "multipart"] }
+axum = { version = "0.6.20", features = ["macros", "multipart", "form"] }
 httpc-test = "0.1.5"
 lazy-regex = "3.0.1"
 serde = { version = "1.0.183" }
@@ -17,7 +17,7 @@ strum_macros = "0.25.2"
 tokio = { version = "1.32.0", features = ["full"] }
 tower-cookies = "0.9.0"
 tower-http = { version = "0.4.3", features = ["fs"] }
-reqwest = "0.11.18"
+reqwest = { version = "0.11.18", features = ["multipart"] }
 once_cell = "1.18.0"
 lazy_static = "1.4.0"
 dotenv = "0.15.0"

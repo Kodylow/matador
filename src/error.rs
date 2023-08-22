@@ -9,12 +9,14 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     // OpenAI Errors
     OpenAIError { status: StatusCode, text: String },
+    // ClipDrop Errors
+    ClipDropError { status: StatusCode, text: String },
 }
 
 // Note: never ever pass through a server error to the client
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        println!("->> {:12} - Error::into_response", "HANDLER");
+        println!("Error: {:?}", self);
 
         // Create a placeholder Axum response
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();

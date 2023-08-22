@@ -80,30 +80,6 @@ impl OpenAI {
         self.send_post_request(&url, &req).await
     }
 
-    pub async fn create_image(
-        &self,
-        req: types::ImageCreationRequest,
-    ) -> Result<types::ImageResponse> {
-        trace!("Creating image");
-        let url = format!("{}{}", self.api_base, IMAGE_GENERATIONS);
-        self.send_post_request(&url, &req).await
-    }
-
-    pub async fn edit_image(&self, req: types::ImageEditRequest) -> Result<types::ImageResponse> {
-        trace!("Editing image");
-        let url = format!("{}{}", self.api_base, IMAGE_EDITS);
-        self.send_post_request(&url, &req).await
-    }
-
-    pub async fn vary_image(
-        &self,
-        req: types::ImageVariationRequest,
-    ) -> Result<types::ImageResponse> {
-        trace!("Creating image variation");
-        let url = format!("{}{}", self.api_base, IMAGE_VARIATIONS);
-        self.send_post_request(&url, &req).await
-    }
-
     pub async fn create_embeddings(
         &self,
         req: types::EmbeddingRequest,
@@ -113,57 +89,81 @@ impl OpenAI {
         self.send_post_request(&url, &req).await
     }
 
-    pub async fn create_transcription(
+    pub async fn create_image(
         &self,
-        req: types::AudioRequest,
-    ) -> Result<types::AudioResponse> {
-        trace!("Creating transcription");
-        let url = format!("{}{}", self.api_base, TRANSCRIPTIONS);
+        req: types::ImageCreationRequest,
+    ) -> Result<types::ImageResponse> {
+        trace!("Creating image");
+        let url = format!("{}{}", self.api_base, IMAGE_GENERATIONS);
         self.send_post_request(&url, &req).await
     }
 
-    pub async fn create_translation(
-        &self,
-        req: types::AudioRequest,
-    ) -> Result<types::AudioResponse> {
-        trace!("Creating translation");
-        let url = format!("{}{}", self.api_base, TRANSLATIONS);
-        self.send_post_request(&url, &req).await
-    }
+    // pub async fn edit_image(&self, req: types::ImageEditRequest) -> Result<types::ImageResponse> {
+    //     trace!("Editing image");
+    //     let url = format!("{}{}", self.api_base, IMAGE_EDITS);
+    //     self.send_post_request(&url, &req).await
+    // }
 
-    pub async fn list_files(&self) -> Result<types::FileListResponse> {
-        trace!("Listing files");
-        let url = format!("{}{}", self.api_base, FILES);
-        self.send_get_request(&url).await
-    }
+    // pub async fn vary_image(
+    //     &self,
+    //     req: types::ImageVariationRequest,
+    // ) -> Result<types::ImageResponse> {
+    //     trace!("Creating image variation");
+    //     let url = format!("{}{}", self.api_base, IMAGE_VARIATIONS);
+    //     self.send_post_request(&url, &req).await
+    // }
 
-    pub async fn upload_file(&self, req: types::FileUploadRequest) -> Result<types::FileResponse> {
-        trace!("Uploading file");
-        let url = format!("{}{}", self.api_base, FILES);
-        self.send_post_request(&url, &req).await
-    }
+    // pub async fn create_transcription(
+    //     &self,
+    //     req: types::AudioRequest,
+    // ) -> Result<types::AudioResponse> {
+    //     trace!("Creating transcription");
+    //     let url = format!("{}{}", self.api_base, TRANSCRIPTIONS);
+    //     self.send_post_request(&url, &req).await
+    // }
 
-    pub async fn delete_file(&self, file_id: &str) -> Result<types::FileDeletionResponse> {
-        trace!("Deleting file {}", file_id);
-        let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
-        self.send_delete_request(&url).await
-    }
+    // pub async fn create_translation(
+    //     &self,
+    //     req: types::AudioRequest,
+    // ) -> Result<types::AudioResponse> {
+    //     trace!("Creating translation");
+    //     let url = format!("{}{}", self.api_base, TRANSLATIONS);
+    //     self.send_post_request(&url, &req).await
+    // }
 
-    pub async fn retrieve_file(&self, file_id: &str) -> Result<types::FileResponse> {
-        trace!("Retrieving file {}", file_id);
-        let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
-        self.send_get_request(&url).await
-    }
+    // pub async fn list_files(&self) -> Result<types::FileListResponse> {
+    //     trace!("Listing files");
+    //     let url = format!("{}{}", self.api_base, FILES);
+    //     self.send_get_request(&url).await
+    // }
 
-    pub async fn retrieve_file_content(&self, file_id: &str) -> Result<types::FileContentResponse> {
-        trace!("Retrieving file content {}", file_id);
-        let url = format!(
-            "{}{}",
-            self.api_base,
-            FILE_CONTENT.replace(":file_id", file_id)
-        );
-        self.send_get_request(&url).await
-    }
+    // pub async fn upload_file(&self, req: types::FileUploadRequest) -> Result<types::FileResponse> {
+    //     trace!("Uploading file");
+    //     let url = format!("{}{}", self.api_base, FILES);
+    //     self.send_post_request(&url, &req).await
+    // }
+
+    // pub async fn delete_file(&self, file_id: &str) -> Result<types::FileDeletionResponse> {
+    //     trace!("Deleting file {}", file_id);
+    //     let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
+    //     self.send_delete_request(&url).await
+    // }
+
+    // pub async fn retrieve_file(&self, file_id: &str) -> Result<types::FileResponse> {
+    //     trace!("Retrieving file {}", file_id);
+    //     let url = format!("{}{}", self.api_base, FILE.replace(":file_id", file_id));
+    //     self.send_get_request(&url).await
+    // }
+
+    // pub async fn retrieve_file_content(&self, file_id: &str) -> Result<types::FileContentResponse> {
+    //     trace!("Retrieving file content {}", file_id);
+    //     let url = format!(
+    //         "{}{}",
+    //         self.api_base,
+    //         FILE_CONTENT.replace(":file_id", file_id)
+    //     );
+    //     self.send_get_request(&url).await
+    // }
 
     async fn send_get_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
         trace!("Sending GET request to {}", url);
