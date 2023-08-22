@@ -21,11 +21,14 @@ impl LightningAddress {
 
     async fn validate_and_set_callback(&mut self) {
         let well_known_response = self.get_well_known_response().await;
-        // Add your validation logic here. For example:
-        if well_known_response.status == "OK" {
-            self.callback = well_known_response.callback;
+        // TODO: Add validation logic here
+
+        // if callback ends with "/" strip it
+        if well_known_response.callback.ends_with("/") {
+            self.callback =
+                well_known_response.callback[..well_known_response.callback.len() - 1].to_string();
         } else {
-            panic!("Invalid well-known response");
+            self.callback = well_known_response.callback;
         }
     }
 
@@ -79,14 +82,16 @@ struct PayerData {
 
 #[derive(Debug, Deserialize)]
 struct WellKnownResponse {
-    status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    status: Option<String>,
     tag: String,
     commentAllowed: u8,
     callback: String,
     metadata: String,
     minSendable: i64,
     maxSendable: i64,
-    payerData: PayerData,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    payerData: Option<PayerData>,
     nostrPubkey: String,
     allowsNostr: bool,
 }
@@ -99,9 +104,9 @@ struct SuccessAction {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct CallbackResponse {
-    status: String,
-    successAction: SuccessAction,
-    verify: String,
-    routes: Vec<String>,
+    status: Option<String>,
+    successAction: Option<SuccessAction>,
+    verify: Option<String>,
+    routes: Option<Vec<String>>,
     pr: String,
 }

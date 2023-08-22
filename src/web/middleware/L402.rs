@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Result;
 
-pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
+pub async fn mw_L402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
     let headers = req.headers();
     match headers.get("authorization") {
         Some(value) if value.to_str().unwrap_or("").starts_with("L402") => {
@@ -23,7 +23,7 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
             let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
             res.headers_mut().insert(
                 "www-authenticate",
-                HeaderValue::from_str(&l402.to_string()).unwrap(),
+                HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
             );
             Ok(res)
         }
@@ -37,12 +37,12 @@ struct L402 {
 
 impl L402 {
     async fn new(token: String) -> Self {
-        let lnaddress = LightningAddress::new("kodylow@getalby.com").await; // replace with actual LNADDRESS
+        let lnaddress = LightningAddress::new(dotenv::var("LNADDRESS").unwrap().as_str()).await;
         let invoice = lnaddress.get_invoice().await;
         L402 { token, invoice }
     }
 
-    fn to_string(&self) -> String {
+    fn to_authenticate_string(&self) -> String {
         format!(
             "L402 token=\"{}\", invoice=\"{}\"",
             self.token, self.invoice

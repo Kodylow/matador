@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let router = Router::new()
         .nest("/openai", web::routes_openai::routes())
         .nest("/clipdrop", web::routes_clipdrop::routes())
-        .layer(middleware::from_fn(L402::mw_l402));
+        .layer(middleware::from_fn(L402::mw_L402));
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("Server listening on {addr}");
     axum::Server::bind(&addr)
