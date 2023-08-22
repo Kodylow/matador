@@ -3,13 +3,14 @@ use crate::services::openai::{
     IMAGE_GENERATIONS, IMAGE_VARIATIONS, MODEL_LIST, MODEL_RETRIEVE, TRANSCRIPTIONS, TRANSLATIONS,
 };
 use crate::{services, Result};
-use axum::extract::Path;
+use axum::extract::{DefaultBodyLimit, Multipart, Path};
 use axum::Json;
 use axum::{
     routing::{get, post},
     Extension, Router,
 };
 use serde_json::Value;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, trace};
@@ -50,6 +51,7 @@ pub fn routes() -> Router {
         .route(FILE_CONTENT, get(file_retrieve_content))
         // Add middleware that inserts the state into all incoming request's
         // extensions.
+        .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
         .layer(Extension(app_state))
 }
 
@@ -100,6 +102,7 @@ pub async fn image_edit(
     Json(req): Json<openai::types::ImageEditRequest>,
 ) -> Result<Json<openai::types::ImageResponse>> {
     info!("Calling route: image_edit");
+
     let openai = app_state.get_openai().await;
     let response = openai.edit_image(req).await?;
     Ok(Json(response))

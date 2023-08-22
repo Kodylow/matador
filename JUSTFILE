@@ -10,7 +10,7 @@ chat:
     curl http://localhost:8080/openai/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "gpt-3.5-turbo","messages": [{"role": "system","content": "You are a helpful assistant."},{"role": "user","content": "Hello!"}]}' | jq
 
 image-edit:
-    curl http://localhost:8080/openai/v1/images/edits -F image="@otter.png" -F mask="@mask.png" -F prompt="A cute baby sea otter wearing a beret" -F n=2 -F size="1024x1024" | jq
+    curl http://localhost:8080/openai/v1/images/edits -F image="@otter.png" -F prompt="A cute baby sea otter wearing a beret" -F n=2 -F size="1024x1024" | jq
 
 image-create:
     curl http://localhost:8080/openai/v1/images/generations -H "Content-Type: application/json" -d '{"prompt": "A cute baby sea otter","n": 2,"size": "1024x1024"}' | jq

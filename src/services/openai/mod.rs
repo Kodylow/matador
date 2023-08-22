@@ -216,6 +216,35 @@ impl OpenAI {
         Ok(value)
     }
 
+    // async fn send_post_request_with_form<T: DeserializeOwned>(
+    //     &self,
+    //     url: &str,
+    //     form: axum::extract::multipart::,
+    // ) -> Result<T> {
+    //     trace!("Sending POST request to {}", url);
+    //     let res = self
+    //         .client
+    //         .post(url)
+    //         .bearer_auth(&self.api_key)
+    //         .multipart(form)
+    //         .send()
+    //         .await;
+
+    //     let value: T = match res {
+    //         Ok(res) => {
+    //             trace!("POST request successful");
+    //             res.json().await.unwrap()
+    //         }
+    //         Err(e) => {
+    //             trace!("POST request failed");
+    //             let status = e.status().unwrap();
+    //             let text = e.to_string();
+    //             return Err(Error::OpenAIError { status, text });
+    //         }
+    //     };
+    //     Ok(value)
+    // }
+
     async fn send_delete_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
         trace!("Sending DELETE request to {}", url);
         let res = self
