@@ -1,4 +1,4 @@
-use crate::web::middleware::L402;
+use crate::web::middleware::l402;
 
 pub use self::error::{Error, Result};
 
@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let router = Router::new()
         .nest("/openai", web::routes_openai::routes())
         .nest("/clipdrop", web::routes_clipdrop::routes())
-        .layer(middleware::from_fn(L402::mw_L402));
+        .layer(middleware::from_fn(l402::mw_l402));
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("Server listening on {addr}");
     axum::Server::bind(&addr)

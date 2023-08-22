@@ -1,2 +1,2 @@
-pub mod L402;
-pub mod LightningAddress;
+pub mod l402;
+pub mod lightning_address;

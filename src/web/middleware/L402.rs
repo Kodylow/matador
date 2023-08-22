@@ -1,17 +1,15 @@
-use super::LightningAddress::LightningAddress;
+use super::lightning_address::LightningAddress;
 use crate::error::Result;
 use axum::{
-    http::{header, HeaderMap, HeaderValue, Request, StatusCode},
+    http::{HeaderValue, Request, StatusCode},
     middleware::Next,
     response::IntoResponse,
     response::Response,
 };
-use futhark::{Alternative, Condition, Restriction, Rune, RuneError};
+use futhark::{Restriction, Rune};
 use lightning_invoice::Bolt11Invoice;
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
 
-pub async fn mw_L402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
+pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
     let headers = req.headers();
     match headers.get("authorization") {
         Some(value) if value.to_str().unwrap_or("").starts_with("L402") => {

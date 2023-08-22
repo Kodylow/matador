@@ -1,11 +1,11 @@
 use crate::services::clipdrop::types::ImageCreationRequest;
-use crate::services::clipdrop::{self, ClipDrop, TEXT_TO_IMAGE};
+use crate::services::clipdrop::{ClipDrop, TEXT_TO_IMAGE};
 use crate::{services, Error, Result};
-use axum::body::{Body, Bytes};
-use axum::extract::{DefaultBodyLimit, Path};
-use axum::response::{IntoResponse, Response};
+use axum::body::Bytes;
+use axum::extract::DefaultBodyLimit;
+use axum::response::Response;
 use axum::{routing::post, Extension, Router};
-use axum::{Form, Json};
+
 use axum_typed_multipart::TypedMultipart;
 use reqwest::header::CONTENT_TYPE;
 use std::sync::Arc;
