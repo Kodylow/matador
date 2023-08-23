@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::services::api_client::ApiClient;
 use crate::services::makersuite::types::{GenerateTextRequest, GenerateTextResponse};
 use crate::{Error, Result};
 use lazy_static::lazy_static;
@@ -12,83 +13,42 @@ use self::types::{EmbedTextRequest, EmbedTextResponse};
 
 pub mod types;
 
-lazy_static! {
-    static ref MAKERSUITE_CLIENT: Arc<Mutex<MakerSuite>> = Arc::new(Mutex::new(MakerSuite::new()));
-}
-
 pub const GENERATE_TEXT: &str = "/v1beta2/models/text-bison-001:generateText";
 pub const EMBED_TEXT: &str = "/v1beta2/models/embedding-gecko-001:embedText";
 
+#[derive(Clone)]
 pub struct MakerSuite {
-    api_key: String,
-    api_base: String,
-    client: reqwest::Client,
+    pub client: ApiClient,
 }
 
 impl MakerSuite {
-    fn new() -> Self {
+    pub fn new() -> Self {
         trace!("Creating new MakerSuite instance");
-        let api_key = dotenv::var("MAKERSUITE_API_KEY")
-            .unwrap_or_else(|_| panic!("PALM_API_KEY must be set"));
-        let client = Client::new();
-        let api_base = "https://generativelanguage.googleapis.com".to_string();
+        let client = ApiClient::new(
+            "MAKERSUITE_API_KEY",
+            "https://generativelanguage.googleapis.com".to_string(),
+        );
         trace!("MakerSuite instance created");
-        MakerSuite {
-            client,
-            api_key,
-            api_base,
-        }
-    }
-
-    pub fn get_instance() -> Arc<Mutex<MakerSuite>> {
-        trace!("Getting MakerSuite instance");
-        Arc::clone(&MAKERSUITE_CLIENT)
+        MakerSuite { client }
     }
 
     pub async fn generate_text(
         &self,
         model_id: &str,
-        req: GenerateTextRequest,
+        req: &GenerateTextRequest,
     ) -> Result<GenerateTextResponse> {
-        trace!("Generating text from model: {}", model_id);
         let url = format!(
             "{}{}",
-            self.api_base,
+            self.client.base,
             GENERATE_TEXT.replace(":model_id", model_id)
         );
-
-        self.send_post_request(&url, &req).await
+        self.client.send_post_request(&url, req).await
     }
 
     pub async fn embed_text(&self, req: EmbedTextRequest) -> Result<EmbedTextResponse> {
         trace!("Generating text embedding");
-        let url = format!("{}{}", self.api_base, EMBED_TEXT);
+        let url = format!("{}{}", self.client.base, EMBED_TEXT);
 
-        self.send_post_request(&url, &req).await
-    }
-
-    async fn send_post_request<T: Serialize + std::fmt::Debug, R: DeserializeOwned>(
-        &self,
-        url: &str,
-        req: &T,
-    ) -> Result<R> {
-        trace!("Sending POST request to {}", url);
-        let url_with_key = format!("{}?key={}", url, self.api_key);
-        println!("url_with_key: {}", url_with_key);
-        let res = self.client.post(&url_with_key).json(req).send().await;
-
-        let value: R = match res {
-            Ok(res) => {
-                trace!("POST request successful");
-                res.json().await.unwrap()
-            }
-            Err(e) => {
-                trace!("POST request failed");
-                let status = e.status().unwrap();
-                let text = e.to_string();
-                return Err(Error::MakerSuiteError { status, text });
-            }
-        };
-        Ok(value)
+        self.client.send_post_request(&url, &req).await
     }
 }
