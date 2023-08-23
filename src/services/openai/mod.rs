@@ -19,14 +19,14 @@ pub const MODEL_LIST: &str = "/v1/models";
 pub const MODEL_RETRIEVE: &str = "/v1/models/:model_id";
 pub const CHAT_COMPLETIONS: &str = "/v1/chat/completions";
 pub const IMAGE_GENERATIONS: &str = "/v1/images/generations";
-pub const IMAGE_EDITS: &str = "/v1/images/edits";
-pub const IMAGE_VARIATIONS: &str = "/v1/images/variations";
 pub const EMBEDDINGS: &str = "/v1/embeddings";
-pub const TRANSCRIPTIONS: &str = "/v1/audio/transcriptions";
-pub const TRANSLATIONS: &str = "/v1/audio/translations";
-pub const FILES: &str = "/v1/files";
-pub const FILE: &str = "/v1/files/:file_id";
-pub const FILE_CONTENT: &str = "/v1/files/:file_id/content";
+// pub const IMAGE_EDITS: &str = "/v1/images/edits";
+// pub const IMAGE_VARIATIONS: &str = "/v1/images/variations";
+// pub const TRANSCRIPTIONS: &str = "/v1/audio/transcriptions";
+// pub const TRANSLATIONS: &str = "/v1/audio/translations";
+// pub const FILES: &str = "/v1/files";
+// pub const FILE: &str = "/v1/files/:file_id";
+// pub const FILE_CONTENT: &str = "/v1/files/:file_id/content";
 
 #[derive(Clone)]
 pub struct OpenAI {
@@ -199,8 +199,6 @@ impl OpenAI {
             .send()
             .await;
 
-        println!("Request: {:?}", req);
-        // println!("Response: {:?}", res);
         let value: R = match res {
             Ok(res) => {
                 trace!("POST request successful");
@@ -245,27 +243,27 @@ impl OpenAI {
     //     Ok(value)
     // }
 
-    async fn send_delete_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
-        trace!("Sending DELETE request to {}", url);
-        let res = self
-            .client
-            .delete(url)
-            .bearer_auth(&self.api_key)
-            .send()
-            .await;
+    // async fn send_delete_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
+    //     trace!("Sending DELETE request to {}", url);
+    //     let res = self
+    //         .client
+    //         .delete(url)
+    //         .bearer_auth(&self.api_key)
+    //         .send()
+    //         .await;
 
-        match res {
-            Ok(r) => {
-                trace!("DELETE request successful");
-                let value: R = r.json().await.unwrap();
-                Ok(value)
-            }
-            Err(e) => {
-                trace!("DELETE request failed");
-                let status = e.status().unwrap();
-                let text = e.to_string();
-                Err(Error::OpenAIError { status, text })
-            }
-        }
-    }
+    //     match res {
+    //         Ok(r) => {
+    //             trace!("DELETE request successful");
+    //             let value: R = r.json().await.unwrap();
+    //             Ok(value)
+    //         }
+    //         Err(e) => {
+    //             trace!("DELETE request failed");
+    //             let status = e.status().unwrap();
+    //             let text = e.to_string();
+    //             Err(Error::OpenAIError { status, text })
+    //         }
+    //     }
+    // }
 }

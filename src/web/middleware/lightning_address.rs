@@ -71,11 +71,13 @@ fn parse_lnaddress(lnaddress: &str) -> (&str, &str) {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(unused, non_snake_case)]
 struct PayerDataDetails {
     mandatory: bool,
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(unused, non_snake_case)]
 struct PayerData {
     name: PayerDataDetails,
     email: PayerDataDetails,
@@ -83,6 +85,7 @@ struct PayerData {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(unused, non_snake_case)]
 struct WellKnownResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     status: Option<String>,
@@ -105,6 +108,7 @@ struct SuccessAction {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[allow(unused, non_snake_case)]
 struct CallbackResponse {
     status: Option<String>,
     successAction: Option<SuccessAction>,

@@ -6,11 +6,10 @@ use axum::{
     response::IntoResponse,
     response::Response,
 };
-use chrono::Utc;
 use lightning_invoice::Bolt11Invoice;
 use macaroon::{Format, Macaroon, MacaroonKey, Verifier};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, env};
+use std::env;
 
 pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> crate::Result<Response> {
     let headers = req.headers();
@@ -22,7 +21,6 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> crate::Result<Respons
 
     match header {
         Some(header) => {
-            println!("Authorization header: {:?}", header);
             let l402 = L402::from_auth_header(header.to_str().unwrap())?;
             if l402.is_valid().unwrap() {
                 // If the token is valid, call the next middleware
@@ -89,7 +87,6 @@ impl L402 {
             return Self::invalid_auth_header_error();
         }
 
-        println!("macaroon_preimage: {:?}", macaroon_preimage[0]);
         let rune = Macaroon::deserialize(macaroon_preimage[0].to_string()).unwrap();
         let preimage = Some(macaroon_preimage[1].to_string());
 
@@ -124,7 +121,6 @@ impl L402 {
     fn build_macaroon(payment_hash: String) -> Macaroon {
         let key = Self::get_macaroon_key();
         let mut macaroon = Macaroon::create(Some("location".into()), &key, "id".into()).unwrap();
-        println!("payment_hash: {}", payment_hash);
         macaroon
             .add_first_party_caveat(format!("payment_hash = {}", payment_hash).as_bytes().into());
 
