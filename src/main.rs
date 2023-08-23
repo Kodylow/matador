@@ -25,15 +25,15 @@ async fn main() -> Result<()> {
 
     // Add routes conditionally based on environment variables
     if env::var("OPENAI_API_KEY").is_ok() {
-        router = router.nest("/openai", web::routes_openai::routes());
+        router = router.nest("/openai", web::routes::openai::routes());
         routes_set = true;
     }
     if env::var("CLIPDROP_API_KEY").is_ok() {
-        router = router.nest("/clipdrop", web::routes_clipdrop::routes());
+        router = router.nest("/clipdrop", web::routes::clipdrop::routes());
         routes_set = true;
     }
     if env::var("MAKERSUITE_API_KEY").is_ok() {
-        router = router.nest("/makersuite", web::routes_makersuite::routes());
+        router = router.nest("/makersuite", web::routes::makersuite::routes());
         routes_set = true;
     }
 
