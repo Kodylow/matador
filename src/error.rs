@@ -7,6 +7,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, strum_macros::AsRefStr)]
 pub enum Error {
+    // Router Errors
+    RouterError { text: String },
     // OpenAI Errors
     OpenAIError { status: StatusCode, text: String },
     // ClipDrop Errors

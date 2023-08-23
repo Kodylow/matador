@@ -24,15 +24,15 @@ async fn main() -> Result<()> {
     let mut routes_set = false;
 
     // Add routes conditionally based on environment variables
-    if env::var("OPENAI").is_ok() {
+    if env::var("OPENAI_API_KEY").is_ok() {
         router = router.nest("/openai", web::routes_openai::routes());
         routes_set = true;
     }
-    if env::var("CLIPDROP").is_ok() {
+    if env::var("CLIPDROP_API_KEY").is_ok() {
         router = router.nest("/clipdrop", web::routes_clipdrop::routes());
         routes_set = true;
     }
-    if env::var("MAKERSUITE").is_ok() {
+    if env::var("MAKERSUITE_API_KEY").is_ok() {
         router = router.nest("/makersuite", web::routes_makersuite::routes());
         routes_set = true;
     }
@@ -41,14 +41,18 @@ async fn main() -> Result<()> {
     if env::var("LNADDRESS").is_ok() && env::var("MACAROON_SECRET").is_ok() {
         router = router.layer(middleware::from_fn(l402::mw_l402));
     } else {
-        return Err(Error::new(
-            "Middleware cannot be set because LNADDRESS and/or MACAROON_SECRET are not set",
-        ));
+        return Err(Error::RouterError {
+            text:
+                "No LNADDRESS or MACAROON_SECRET set, you have to set both to enable LND middleware"
+                    .to_string(),
+        });
     }
 
     // Check if any routes are set
     if !routes_set {
-        return Err(Error::new("No routes are set"));
+        return Err(Error::RouterError {
+            text: "No routes set, you have to set at least 1 API KEY".to_string(),
+        });
     }
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

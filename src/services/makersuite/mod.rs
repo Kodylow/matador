@@ -25,8 +25,8 @@ pub struct MakerSuite {
 impl MakerSuite {
     fn new() -> Self {
         trace!("Creating new MakerSuite instance");
-        let api_key =
-            dotenv::var("PALM_API_KEY").unwrap_or_else(|_| panic!("PALM_API_KEY must be set"));
+        let api_key = dotenv::var("MAKERSUITE_API_KEY")
+            .unwrap_or_else(|_| panic!("PALM_API_KEY must be set"));
         let client = Client::new();
         let api_base = "https://generativelanguage.googleapis.com".to_string();
         trace!("MakerSuite instance created");
