@@ -1,3 +1,4 @@
+use crate::services::api_client::ApiClient;
 use crate::services::makersuite::{self, MakerSuite, EMBED_TEXT, GENERATE_TEXT};
 use crate::{services, Error, Result};
 use axum::body::Bytes;
@@ -14,21 +15,15 @@ use tracing::{debug, info, trace};
 
 #[derive(Clone)]
 pub struct AppState {
-    makersuite: Arc<Mutex<services::makersuite::MakerSuite>>,
+    client: MakerSuite,
 }
 
 impl AppState {
     fn new() -> Self {
         info!("Creating new AppState");
         AppState {
-            makersuite: MakerSuite::get_instance(),
+            client: MakerSuite::new(),
         }
-    }
-    async fn get_makersuite(
-        &self,
-    ) -> tokio::sync::MutexGuard<'_, services::makersuite::MakerSuite> {
-        trace!("Getting MakerSuite instance");
-        self.makersuite.lock().await
     }
 }
 
@@ -49,9 +44,11 @@ pub async fn generate_text(
     Json(req): Json<makersuite::types::GenerateTextRequest>,
 ) -> Result<Json<makersuite::types::GenerateTextResponse>> {
     info!("Calling route: generate_text");
-    let makersuite = app_state.get_makersuite().await;
     println!("model_id: {}", model_id);
-    let text_response = makersuite.generate_text(model_id.as_str(), req).await?;
+    let text_response = app_state
+        .client
+        .generate_text(model_id.as_str(), &req)
+        .await?;
 
     Ok(Json(text_response))
 }
@@ -62,8 +59,7 @@ pub async fn embed_text(
     Json(req): Json<makersuite::types::EmbedTextRequest>,
 ) -> Result<Json<makersuite::types::EmbedTextResponse>> {
     info!("Calling route: embed_text");
-    let makersuite = app_state.get_makersuite().await;
-    let embed_response = makersuite.embed_text(req).await?;
+    let embed_response = app_state.client.embed_text(req).await?;
 
     Ok(Json(embed_response))
 }

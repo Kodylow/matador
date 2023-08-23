@@ -16,19 +16,15 @@ use tracing::{info, trace};
 
 #[derive(Clone)]
 pub struct AppState {
-    openai: Arc<Mutex<services::openai::OpenAI>>,
+    client: OpenAI,
 }
 
 impl AppState {
     fn new() -> Self {
         info!("Creating new AppState");
         AppState {
-            openai: OpenAI::get_instance(),
+            client: OpenAI::new(),
         }
-    }
-    async fn get_openai(&self) -> tokio::sync::MutexGuard<'_, services::openai::OpenAI> {
-        trace!("Getting OpenAI instance");
-        self.openai.lock().await
     }
 }
 
@@ -57,8 +53,7 @@ pub fn routes() -> Router {
 #[axum::debug_handler]
 pub async fn list_models(app_state: Extension<Arc<AppState>>) -> Result<Json<Value>> {
     info!("Calling route: list_models");
-    let openai = app_state.get_openai().await;
-    let models = openai.model_list().await?;
+    let models = app_state.client.model_list().await?;
     Ok(Json(models))
 }
 
@@ -68,8 +63,7 @@ pub async fn retrieve_model(
     Path(model_id): Path<String>,
 ) -> Result<Json<Value>> {
     info!("Calling route: retrieve_model {}", model_id);
-    let openai = app_state.get_openai().await;
-    let model = openai.model_retrieve(&model_id).await?;
+    let model = app_state.client.model_retrieve(&model_id).await?;
     Ok(Json(model))
 }
 
@@ -79,8 +73,7 @@ pub async fn chat_completion_create(
     Json(req): Json<openai::types::ChatCompletionRequest>,
 ) -> Result<Json<openai::types::ChatCompletionResponse>> {
     info!("Calling route: chat_completion_create");
-    let openai = app_state.get_openai().await;
-    let response = openai.create_chat_completion(req).await?;
+    let response = app_state.client.create_chat_completion(req).await?;
     Ok(Json(response))
 }
 
@@ -90,8 +83,7 @@ pub async fn embeddings_create(
     Json(req): Json<openai::types::EmbeddingRequest>,
 ) -> Result<Json<openai::types::EmbeddingResponse>> {
     info!("Calling route: embeddings");
-    let openai = app_state.get_openai().await;
-    let response = openai.create_embeddings(req).await?;
+    let response = app_state.client.create_embeddings(req).await?;
     Ok(Json(response))
 }
 
@@ -101,8 +93,7 @@ pub async fn image_create(
     Json(req): Json<openai::types::ImageCreationRequest>,
 ) -> Result<Json<openai::types::ImageResponse>> {
     info!("Calling route: image_create");
-    let openai = app_state.get_openai().await;
-    let response = openai.create_image(req).await?;
+    let response = app_state.client.create_image(req).await?;
     Ok(Json(response))
 }
 
@@ -112,9 +103,7 @@ pub async fn image_create(
 //     Json(req): Json<openai::types::ImageEditRequest>,
 // ) -> Result<Json<openai::types::ImageResponse>> {
 //     info!("Calling route: image_edit");
-
-//     let openai = app_state.get_openai().await;
-//     let response = openai.edit_image(req).await?;
+//     let response = app_state.client.edit_image(req).await?;
 //     Ok(Json(response))
 // }
 
@@ -125,7 +114,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::ImageResponse>> {
 //     info!("Calling route: image_vary");
 //     let openai = app_state.get_openai().await;
-//     let response = openai.vary_image(req).await?;
+//     let response = app_state.client.vary_image(req).await?;
 //     Ok(Json(response))
 // }
 
@@ -136,7 +125,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::AudioResponse>> {
 //     info!("Calling route: transcription_create");
 //     let openai = app_state.get_openai().await;
-//     let response = openai.create_transcription(req).await?;
+//     let response = app_state.client.create_transcription(req).await?;
 //     Ok(Json(response))
 // }
 
@@ -147,7 +136,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::AudioResponse>> {
 //     info!("Calling route: translation_create");
 //     let openai = app_state.get_openai().await;
-//     let response = openai.create_translation(req).await?;
+//     let response = app_state.client.create_translation(req).await?;
 //     Ok(Json(response))
 // }
 
@@ -157,7 +146,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::FileListResponse>> {
 //     info!("Calling route: files_list");
 //     let openai = app_state.get_openai().await;
-//     let response = openai.list_files().await?;
+//     let response = app_state.client.list_files().await?;
 //     Ok(Json(response))
 // }
 
@@ -168,7 +157,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::FileResponse>> {
 //     info!("Calling route: file_upload");
 //     let openai = app_state.get_openai().await;
-//     let response = openai.upload_file(req).await?;
+//     let response = app_state.client.upload_file(req).await?;
 //     Ok(Json(response))
 // }
 
@@ -179,7 +168,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::FileDeletionResponse>> {
 //     info!("Calling route: file_delete {}", file_id);
 //     let openai = app_state.get_openai().await;
-//     let response = openai.delete_file(&file_id).await?;
+//     let response = app_state.client.delete_file(&file_id).await?;
 //     Ok(Json(response))
 // }
 
@@ -190,7 +179,7 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::FileResponse>> {
 //     info!("Calling route: file_retrieve {}", file_id);
 //     let openai = app_state.get_openai().await;
-//     let response = openai.retrieve_file(&file_id).await?;
+//     let response = app_state.client.retrieve_file(&file_id).await?;
 //     Ok(Json(response))
 // }
 
@@ -201,6 +190,6 @@ pub async fn image_create(
 // ) -> Result<Json<openai::types::FileContentResponse>> {
 //     info!("Calling route: file_retrieve_content {}", file_id);
 //     let openai = app_state.get_openai().await;
-//     let response = openai.retrieve_file_content(&file_id).await?;
+//     let response = app_state.client.retrieve_file_content(&file_id).await?;
 //     Ok(Json(response))
 // }

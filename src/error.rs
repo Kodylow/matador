@@ -9,12 +9,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     // Router Errors
     RouterError { text: String },
-    // OpenAI Errors
-    OpenAIError { status: StatusCode, text: String },
-    // ClipDrop Errors
-    ClipDropError { status: StatusCode, text: String },
-    // MakerSuite Errors
-    MakerSuiteError { status: StatusCode, text: String },
+    // API Error
+    ApiError { status: StatusCode, text: String },
 
     // Lightning Errors
     L402Error { status: StatusCode, text: String },

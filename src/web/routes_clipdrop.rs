@@ -1,32 +1,30 @@
 use crate::services::clipdrop::types::ImageCreationRequest;
-use crate::services::clipdrop::{ClipDrop, TEXT_TO_IMAGE};
+use crate::services::clipdrop::{self, ClipDrop, TEXT_TO_IMAGE};
 use crate::{services, Error, Result};
 use axum::body::Bytes;
-use axum::extract::DefaultBodyLimit;
+use axum::extract::{DefaultBodyLimit, Path};
 use axum::response::Response;
+use axum::Json;
 use axum::{routing::post, Extension, Router};
 
 use axum_typed_multipart::TypedMultipart;
 use reqwest::header::CONTENT_TYPE;
+use reqwest::StatusCode;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, trace};
 
 #[derive(Clone)]
 pub struct AppState {
-    clipdrop: Arc<Mutex<services::clipdrop::ClipDrop>>,
+    client: ClipDrop,
 }
 
 impl AppState {
     fn new() -> Self {
         info!("Creating new AppState");
         AppState {
-            clipdrop: ClipDrop::get_instance(),
+            client: ClipDrop::new(),
         }
-    }
-    async fn get_clipdrop(&self) -> tokio::sync::MutexGuard<'_, services::clipdrop::ClipDrop> {
-        trace!("Getting ClipDrop instance");
-        self.clipdrop.lock().await
     }
 }
 
@@ -45,19 +43,13 @@ pub async fn image_create_from_text(
     TypedMultipart(req): TypedMultipart<ImageCreationRequest>,
 ) -> Result<Bytes> {
     info!("Calling route: image_create_from_text");
-    let clipdrop = app_state.get_clipdrop().await;
-    let image_data = clipdrop.create_image_from_text(req).await;
+    let image_response = app_state.client.create_image_from_text(req).await;
 
-    match image_data {
-        Ok(data) => {
-            let mut res = Response::new(data.into());
-            res.headers_mut()
-                .insert(CONTENT_TYPE, "image/png".parse().unwrap());
-            Ok(res.into_body())
-        }
-        Err(e) => Err(Error::ClipDropError {
-            status: e.status().unwrap(),
-            text: e.to_string(),
+    match image_response {
+        Ok(bytes) => Ok(bytes.into()),
+        Err(e) => Err(Error::ApiError {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            text: "Error creating image from text".to_string(),
         }),
     }
 }
