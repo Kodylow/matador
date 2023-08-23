@@ -41,7 +41,6 @@ pub async fn generate_text(
     Json(req): Json<makersuite::types::GenerateTextRequest>,
 ) -> Result<Json<makersuite::types::GenerateTextResponse>> {
     info!("Calling route: generate_text");
-    println!("model_id: {}", model_id);
     let text_response = app_state
         .client
         .generate_text(model_id.as_str(), &req)

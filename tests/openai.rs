@@ -13,7 +13,6 @@ async fn test_list_models() -> Result<()> {
         .await?
         .json()
         .await?;
-    println!("{:#?}", resp);
     Ok(())
 }
 
@@ -26,7 +25,6 @@ async fn test_retrieve_model() -> Result<()> {
         .await?
         .json()
         .await?;
-    println!("{:#?}", resp);
     Ok(())
 }
 
@@ -47,7 +45,6 @@ async fn test_chat_completion_create() -> Result<()> {
         .await?
         .json()
         .await?;
-    println!("{:#?}", resp);
     Ok(())
 }
 
@@ -66,7 +63,6 @@ async fn test_image_generations() -> Result<()> {
         .await?
         .json()
         .await?;
-    println!("{:#?}", resp);
     Ok(())
 }
 
@@ -84,6 +80,5 @@ async fn test_embeddings_create() -> Result<()> {
         .await?
         .json()
         .await?;
-    println!("{:#?}", resp);
     Ok(())
 }
