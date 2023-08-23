@@ -134,3 +134,20 @@ pub struct CitationMetadata {
     #[serde(skip_serializing_if = "Option::is_none", rename = "citationSources")]
     pub citation_sources: Option<Vec<CitationSource>>,
 }
+
+// Embeddings
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EmbedTextRequest {
+    pub text: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EmbedTextResponse {
+    pub embedding: Embedding,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Embedding {
+    pub value: Vec<f64>,
+}

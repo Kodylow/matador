@@ -8,13 +8,16 @@ use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::Mutex;
 use tracing::trace;
 
+use self::types::{EmbedTextRequest, EmbedTextResponse};
+
 pub mod types;
 
 lazy_static! {
     static ref MAKERSUITE_CLIENT: Arc<Mutex<MakerSuite>> = Arc::new(Mutex::new(MakerSuite::new()));
 }
 
-pub const GENERATE_TEXT: &str = "/v1beta2/models/:model_id";
+pub const GENERATE_TEXT: &str = "/v1beta2/models/text-bison-001:generateText";
+pub const EMBED_TEXT: &str = "/v1beta2/models/embedding-gecko-001:embedText";
 
 pub struct MakerSuite {
     api_key: String,
@@ -53,6 +56,13 @@ impl MakerSuite {
             self.api_base,
             GENERATE_TEXT.replace(":model_id", model_id)
         );
+
+        self.send_post_request(&url, &req).await
+    }
+
+    pub async fn embed_text(&self, req: EmbedTextRequest) -> Result<EmbedTextResponse> {
+        trace!("Generating text embedding");
+        let url = format!("{}{}", self.api_base, EMBED_TEXT);
 
         self.send_post_request(&url, &req).await
     }

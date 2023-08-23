@@ -1,4 +1,4 @@
-use crate::services::makersuite::{self, MakerSuite, GENERATE_TEXT};
+use crate::services::makersuite::{self, MakerSuite, EMBED_TEXT, GENERATE_TEXT};
 use crate::{services, Error, Result};
 use axum::body::Bytes;
 use axum::extract::{DefaultBodyLimit, Path};
@@ -37,6 +37,7 @@ pub fn routes() -> Router {
     let app_state = Arc::new(AppState::new());
     Router::new()
         .route(GENERATE_TEXT, post(generate_text))
+        .route(EMBED_TEXT, post(embed_text))
         .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
         .layer(Extension(app_state))
 }
@@ -53,4 +54,16 @@ pub async fn generate_text(
     let text_response = makersuite.generate_text(model_id.as_str(), req).await?;
 
     Ok(Json(text_response))
+}
+
+#[axum::debug_handler]
+pub async fn embed_text(
+    app_state: Extension<Arc<AppState>>,
+    Json(req): Json<makersuite::types::EmbedTextRequest>,
+) -> Result<Json<makersuite::types::EmbedTextResponse>> {
+    info!("Calling route: embed_text");
+    let makersuite = app_state.get_makersuite().await;
+    let embed_response = makersuite.embed_text(req).await?;
+
+    Ok(Json(embed_response))
 }
