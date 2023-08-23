@@ -1,12 +1,7 @@
-use std::sync::Arc;
-
 use crate::services::api_client::ApiClient;
 use crate::services::makersuite::types::{GenerateTextRequest, GenerateTextResponse};
-use crate::{Error, Result};
-use lazy_static::lazy_static;
-use reqwest::{header::CONTENT_TYPE, Client};
-use serde::{de::DeserializeOwned, Serialize};
-use tokio::sync::Mutex;
+use crate::Result;
+
 use tracing::trace;
 
 use self::types::{EmbedTextRequest, EmbedTextResponse};

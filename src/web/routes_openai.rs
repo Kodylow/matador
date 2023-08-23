@@ -1,7 +1,7 @@
 use crate::services::openai::{
     self, OpenAI, CHAT_COMPLETIONS, EMBEDDINGS, IMAGE_GENERATIONS, MODEL_LIST, MODEL_RETRIEVE,
 };
-use crate::{services, Result};
+use crate::Result;
 use axum::extract::{DefaultBodyLimit, Path};
 use axum::Json;
 use axum::{
@@ -11,8 +11,8 @@ use axum::{
 use serde_json::Value;
 
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tracing::{info, trace};
+
+use tracing::info;
 
 #[derive(Clone)]
 pub struct AppState {

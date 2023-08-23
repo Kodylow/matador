@@ -1,8 +1,7 @@
 use crate::services::api_client::ApiClient;
 use crate::services::clipdrop::types::ImageCreationRequest;
-use crate::{Error, Result};
-use reqwest::{header::CONTENT_TYPE, Client};
-use serde::{de::DeserializeOwned, Serialize};
+use crate::Result;
+
 use tracing::trace;
 
 pub mod types;

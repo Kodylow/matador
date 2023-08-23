@@ -1,18 +1,17 @@
 use crate::services::clipdrop::types::ImageCreationRequest;
-use crate::services::clipdrop::{self, ClipDrop, TEXT_TO_IMAGE};
-use crate::{services, Error, Result};
+use crate::services::clipdrop::{ClipDrop, TEXT_TO_IMAGE};
+use crate::{Error, Result};
 use axum::body::Bytes;
-use axum::extract::{DefaultBodyLimit, Path};
-use axum::response::Response;
-use axum::Json;
+use axum::extract::DefaultBodyLimit;
+
 use axum::{routing::post, Extension, Router};
 
 use axum_typed_multipart::TypedMultipart;
-use reqwest::header::CONTENT_TYPE;
+
 use reqwest::StatusCode;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tracing::{info, trace};
+
+use tracing::info;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -47,7 +46,7 @@ pub async fn image_create_from_text(
 
     match image_response {
         Ok(bytes) => Ok(bytes.into()),
-        Err(e) => Err(Error::ApiError {
+        Err(_e) => Err(Error::ApiError {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             text: "Error creating image from text".to_string(),
         }),

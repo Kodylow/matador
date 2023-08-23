@@ -1,12 +1,8 @@
-use crate::{services::api_client::ApiClient, Error, Result};
+use crate::{services::api_client::ApiClient, Result};
 
-use reqwest::Client;
 use serde_json::Value;
-use std::sync::Arc;
-use tracing::trace;
 
-use serde::{de::DeserializeOwned, Serialize};
-use tokio::sync::Mutex;
+use tracing::trace;
 
 pub mod types;
 

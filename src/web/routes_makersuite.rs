@@ -1,17 +1,14 @@
-use crate::services::api_client::ApiClient;
 use crate::services::makersuite::{self, MakerSuite, EMBED_TEXT, GENERATE_TEXT};
-use crate::{services, Error, Result};
-use axum::body::Bytes;
+use crate::Result;
+
 use axum::extract::{DefaultBodyLimit, Path};
-use axum::response::Response;
+
 use axum::Json;
 use axum::{routing::post, Extension, Router};
 
-use axum_typed_multipart::TypedMultipart;
-use reqwest::header::CONTENT_TYPE;
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tracing::{debug, info, trace};
+
+use tracing::info;
 
 #[derive(Clone)]
 pub struct AppState {
