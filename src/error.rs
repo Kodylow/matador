@@ -11,6 +11,8 @@ pub enum Error {
     OpenAIError { status: StatusCode, text: String },
     // ClipDrop Errors
     ClipDropError { status: StatusCode, text: String },
+    // MakerSuite Errors
+    MakerSuiteError { status: StatusCode, text: String },
 
     // Lightning Errors
     L402Error { status: StatusCode, text: String },
