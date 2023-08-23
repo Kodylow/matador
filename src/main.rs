@@ -16,6 +16,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let router = Router::new()
         .nest("/openai", web::routes_openai::routes())
+        .layer(middleware::from_fn(l402::mw_l402))
         .nest("/clipdrop", web::routes_clipdrop::routes())
         .layer(middleware::from_fn(l402::mw_l402));
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

@@ -11,6 +11,9 @@ pub enum Error {
     OpenAIError { status: StatusCode, text: String },
     // ClipDrop Errors
     ClipDropError { status: StatusCode, text: String },
+
+    // Lightning Errors
+    L402Error { status: StatusCode, text: String },
 }
 
 // Note: never ever pass through a server error to the client
