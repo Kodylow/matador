@@ -8,8 +8,21 @@ use self::types::{EmbedTextRequest, EmbedTextResponse};
 
 pub mod types;
 
-pub const GENERATE_TEXT: &str = "/v1beta2/models/text-bison-001:generateText";
-pub const EMBED_TEXT: &str = "/v1beta2/models/embedding-gecko-001:embedText";
+pub enum MakerSuiteEndpoints {
+    GenerateText,
+    EmbedText,
+    // Add other endpoints as needed
+}
+
+impl MakerSuiteEndpoints {
+    pub fn path(&self) -> &'static str {
+        match self {
+            MakerSuiteEndpoints::GenerateText => "/v1beta2/models/text-bison-001:generateText",
+            MakerSuiteEndpoints::EmbedText => "/v1beta2/models/embedding-gecko-001:embedText",
+            // Add other endpoints as needed
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct MakerSuite {
@@ -35,14 +48,20 @@ impl MakerSuite {
         let url = format!(
             "{}{}",
             self.client.base,
-            GENERATE_TEXT.replace(":model_id", model_id)
+            MakerSuiteEndpoints::GenerateText
+                .path()
+                .replace(":model_id", model_id)
         );
         self.client.send_post_request(&url, req).await
     }
 
     pub async fn embed_text(&self, req: EmbedTextRequest) -> Result<EmbedTextResponse> {
         trace!("Generating text embedding");
-        let url = format!("{}{}", self.client.base, EMBED_TEXT);
+        let url = format!(
+            "{}{}",
+            self.client.base,
+            MakerSuiteEndpoints::EmbedText.path()
+        );
 
         self.client.send_post_request(&url, &req).await
     }

@@ -1,6 +1,4 @@
-use crate::services::openai::{
-    self, OpenAI, CHAT_COMPLETIONS, EMBEDDINGS, IMAGE_GENERATIONS, MODEL_LIST, MODEL_RETRIEVE,
-};
+use crate::services::openai::{self, OpenAI, OpenAIEndpoints};
 use crate::Result;
 use axum::extract::{DefaultBodyLimit, Path};
 use axum::Json;
@@ -32,18 +30,21 @@ pub fn routes() -> Router {
     info!("Setting up routes");
     let app_state = Arc::new(AppState::new());
     Router::new()
-        .route(MODEL_LIST, get(list_models))
-        .route(CHAT_COMPLETIONS, post(chat_completion_create))
-        .route(MODEL_RETRIEVE, get(retrieve_model))
-        .route(IMAGE_GENERATIONS, post(image_create))
-        // .route(IMAGE_EDITS, post(image_edit))
-        // .route(IMAGE_VARIATIONS, post(image_variation))
-        .route(EMBEDDINGS, post(embeddings_create))
-        // .route(TRANSCRIPTIONS, post(transcription_create))
-        // .route(TRANSLATIONS, post(translation_create))
-        // .route(FILES, get(files_list).post(file_upload))
-        // .route(FILE, get(file_retrieve).delete(file_delete))
-        // .route(FILE_CONTENT, get(file_retrieve_content))
+        .route(OpenAIEndpoints::ModelList.path(), get(list_models))
+        .route(
+            OpenAIEndpoints::ChatCompletions.path(),
+            post(chat_completion_create),
+        )
+        .route(OpenAIEndpoints::ModelRetrieve.path(), get(retrieve_model))
+        .route(OpenAIEndpoints::ImageGenerations.path(), post(image_create))
+        // .route(OpenAIEndpoints::ImageEdits.path(), post(image_edit))
+        // .route(OpenAIEndpoints::ImageVariations.path(), post(image_variation))
+        .route(OpenAIEndpoints::Embeddings.path(), post(embeddings_create))
+        // .route(OpenAIEndpoints::Transcriptions.path(), post(transcription_create))
+        // .route(OpenAIEndpoints::Translations.path(), post(translation_create))
+        // .route(OpenAIEndpoints::Files.path(), get(files_list).post(file_upload))
+        // .route(OpenAIEndpoints::File.path(), get(file_retrieve).delete(file_delete))
+        // .route(OpenAIEndpoints::FileContent.path(), get(file_retrieve_content))
         // Add middleware that inserts the state into all incoming request's
         // extensions.
         .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))

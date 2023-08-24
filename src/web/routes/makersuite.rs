@@ -1,4 +1,4 @@
-use crate::services::makersuite::{self, MakerSuite, EMBED_TEXT, GENERATE_TEXT};
+use crate::services::makersuite::{self, MakerSuite, MakerSuiteEndpoints};
 use crate::Result;
 
 use axum::extract::{DefaultBodyLimit, Path};
@@ -28,8 +28,11 @@ pub fn routes() -> Router {
     info!("Setting up routes");
     let app_state = Arc::new(AppState::new());
     Router::new()
-        .route(GENERATE_TEXT, post(generate_text))
-        .route(EMBED_TEXT, post(embed_text))
+        .route(
+            MakerSuiteEndpoints::GenerateText.path(),
+            post(generate_text),
+        )
+        .route(MakerSuiteEndpoints::EmbedText.path(), post(embed_text))
         .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
         .layer(Extension(app_state))
 }

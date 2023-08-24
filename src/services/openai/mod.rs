@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{services::api_client::ApiClient, Result};
 
 use serde_json::Value;
@@ -6,18 +8,39 @@ use tracing::trace;
 
 pub mod types;
 
-pub const MODEL_LIST: &str = "/v1/models";
-pub const MODEL_RETRIEVE: &str = "/v1/models/:model_id";
-pub const CHAT_COMPLETIONS: &str = "/v1/chat/completions";
-pub const IMAGE_GENERATIONS: &str = "/v1/images/generations";
-pub const EMBEDDINGS: &str = "/v1/embeddings";
-// pub const IMAGE_EDITS: &str = "/v1/images/edits";
-// pub const IMAGE_VARIATIONS: &str = "/v1/images/variations";
-// pub const TRANSCRIPTIONS: &str = "/v1/audio/transcriptions";
-// pub const TRANSLATIONS: &str = "/v1/audio/translations";
-// pub const FILES: &str = "/v1/files";
-// pub const FILE: &str = "/v1/files/:file_id";
-// pub const FILE_CONTENT: &str = "/v1/files/:file_id/content";
+#[derive(Clone)]
+pub enum OpenAIEndpoints {
+    ModelList,
+    ModelRetrieve,
+    ChatCompletions,
+    ImageGenerations,
+    Embeddings,
+    // Add other endpoints as needed
+}
+
+impl OpenAIEndpoints {
+    pub fn path(&self) -> &'static str {
+        match self {
+            OpenAIEndpoints::ModelList => "/v1/models",
+            OpenAIEndpoints::ModelRetrieve => "/v1/models/:model_id",
+            OpenAIEndpoints::ChatCompletions => "/v1/chat/completions",
+            OpenAIEndpoints::ImageGenerations => "/v1/images/generations",
+            OpenAIEndpoints::Embeddings => "/v1/embeddings",
+            // Add other endpoints as needed
+        }
+    }
+
+    pub fn pricing(&self) -> u64 {
+        match self {
+            OpenAIEndpoints::ModelList => 1000,
+            OpenAIEndpoints::ModelRetrieve => 1000,
+            OpenAIEndpoints::ChatCompletions => 1000,
+            OpenAIEndpoints::ImageGenerations => 1000,
+            OpenAIEndpoints::Embeddings => 1000,
+            // Add other endpoints as needed
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct OpenAI {
@@ -34,7 +57,7 @@ impl OpenAI {
 
     pub async fn model_list(&self) -> Result<Value> {
         trace!("Fetching model list");
-        let url = format!("{}{}", self.client.base, MODEL_LIST);
+        let url = format!("{}{}", self.client.base, OpenAIEndpoints::ModelList.path());
         self.client.send_get_request(&url).await
     }
 
@@ -43,7 +66,9 @@ impl OpenAI {
         let url = format!(
             "{}{}",
             self.client.base,
-            MODEL_RETRIEVE.replace(":model_id", model_id)
+            OpenAIEndpoints::ModelRetrieve
+                .path()
+                .replace(":model_id", model_id)
         );
         self.client.send_get_request(&url).await
     }
@@ -53,7 +78,11 @@ impl OpenAI {
         req: types::ChatCompletionRequest,
     ) -> Result<types::ChatCompletionResponse> {
         trace!("Creating chat completion");
-        let url = format!("{}{}", self.client.base, CHAT_COMPLETIONS);
+        let url = format!(
+            "{}{}",
+            self.client.base,
+            OpenAIEndpoints::ChatCompletions.path()
+        );
         self.client.send_post_request(&url, &req).await
     }
 
@@ -62,7 +91,7 @@ impl OpenAI {
         req: types::EmbeddingRequest,
     ) -> Result<types::EmbeddingResponse> {
         trace!("Creating embeddings");
-        let url = format!("{}{}", self.client.base, EMBEDDINGS);
+        let url = format!("{}{}", self.client.base, OpenAIEndpoints::Embeddings.path());
         self.client.send_post_request(&url, &req).await
     }
 
@@ -71,7 +100,11 @@ impl OpenAI {
         req: types::ImageCreationRequest,
     ) -> Result<types::ImageResponse> {
         trace!("Creating image");
-        let url = format!("{}{}", self.client.base, IMAGE_GENERATIONS);
+        let url = format!(
+            "{}{}",
+            self.client.base,
+            OpenAIEndpoints::ImageGenerations.path()
+        );
         self.client.send_post_request(&url, &req).await
     }
 
