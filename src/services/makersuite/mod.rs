@@ -43,8 +43,9 @@ impl MakerSuite {
     pub async fn generate_text(
         &self,
         model_id: &str,
-        req: &GenerateTextRequest,
+        req: GenerateTextRequest,
     ) -> Result<GenerateTextResponse> {
+        println!("In generate_text");
         let url = format!(
             "{}{}",
             self.client.base,
@@ -52,7 +53,9 @@ impl MakerSuite {
                 .path()
                 .replace(":model_id", model_id)
         );
-        self.client.send_post_request(&url, req).await
+        self.client
+            .send_post_request_with_key_query(&url, &req)
+            .await
     }
 
     pub async fn embed_text(&self, req: EmbedTextRequest) -> Result<EmbedTextResponse> {
@@ -63,6 +66,8 @@ impl MakerSuite {
             MakerSuiteEndpoints::EmbedText.path()
         );
 
-        self.client.send_post_request(&url, &req).await
+        self.client
+            .send_post_request_with_key_query(&url, &req)
+            .await
     }
 }

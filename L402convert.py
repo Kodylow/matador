@@ -11,8 +11,8 @@ if __name__ == '__main__':
         print("Usage: script_name www_authenticate_header preimage")
         sys.exit(1)
 
-    www_authenticate_header = sys.argv[1]
-    preimage = sys.argv[2]
+    preimage = sys.argv[1]
+    www_authenticate_header = sys.argv[2]
 
     token = get_token_from_header(www_authenticate_header)
     output = f"\n-H 'Authorization: L402 {token}:{preimage}'"

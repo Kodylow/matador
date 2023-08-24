@@ -16,6 +16,21 @@ impl ApiClient {
         ApiClient { client, key, base }
     }
 
+    pub async fn send_get_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
+        let res = self.client.get(url).bearer_auth(&self.key).send().await;
+
+        let value: R = match res {
+            Ok(res) => res.json().await.unwrap(),
+            Err(e) => {
+                let status = e.status().unwrap();
+                let text = e.to_string();
+                return Err(Error::ApiError { status, text });
+            }
+        };
+
+        Ok(value)
+    }
+
     pub async fn send_post_request<T: Serialize + std::fmt::Debug, R: DeserializeOwned>(
         &self,
         url: &str,
@@ -40,8 +55,16 @@ impl ApiClient {
         Ok(value)
     }
 
-    pub async fn send_get_request<R: DeserializeOwned>(&self, url: &str) -> Result<R> {
-        let res = self.client.get(url).bearer_auth(&self.key).send().await;
+    pub async fn send_post_request_with_key_query<
+        T: Serialize + std::fmt::Debug,
+        R: DeserializeOwned,
+    >(
+        &self,
+        url: &str,
+        req: &T,
+    ) -> Result<R> {
+        let url = format!("{}?key={}", url, &self.key);
+        let res = self.client.post(&url).json(req).send().await;
 
         let value: R = match res {
             Ok(res) => res.json().await.unwrap(),
@@ -51,7 +74,6 @@ impl ApiClient {
                 return Err(Error::ApiError { status, text });
             }
         };
-
         Ok(value)
     }
 }
