@@ -13,6 +13,8 @@ use std::sync::Arc;
 
 use tracing::info;
 
+use super::endpoint::Endpoint;
+
 #[derive(Clone)]
 pub struct AppState {
     client: ClipDrop,
