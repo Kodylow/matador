@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AWESOME-APP Web</title>
+    <script>
+      let token = localStorage.getItem("token");
+      let username = localStorage.getItem("username");
+
+      function updateUI() {
+        console.log("Updating UI...");
+        const loginSection = document.getElementById("loginSection");
+        const userSection = document.getElementById("userSection");
+        const usernameDisplay = document.getElementById("usernameDisplay");
+
+        token = localStorage.getItem("token");
+
+        if (token) {
+          console.log("User is logged in");
+          loginSection.style.display = "none";
+          userSection.style.display = "block";
+          usernameDisplay.textContent = username;
+        } else {
+          console.log("User is not logged in");
+          loginSection.style.display = "block";
+          userSection.style.display = "none";
+        }
+      }
+
+      async function signup() {
+        console.log("Attempting to sign up...");
+        const username = document.getElementById("signupUsername").value;
+        const password = document.getElementById("signupPassword").value;
+
+        const response = await fetch("/api/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, pwd: password }),
+        });
+
+        const data = await response.json();
+        if (data.result.success) {
+          console.log("Signed up successfully");
+          alert("Signed up successfully");
+        } else {
+          console.log("Failed to sign up");
+          alert("Failed to signup");
+        }
+      }
+
+      async function login() {
+        console.log("Attempting to log in...");
+        const usernameInput = document.getElementById("username");
+        const password = document.getElementById("password").value;
+
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: usernameInput.value,
+            pwd: password,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.result.success) {
+          token = data.result.token;
+          username = usernameInput.value;
+          localStorage.setItem("token", token);
+          localStorage.setItem("username", username);
+          console.log("Logged in successfully");
+          alert("Logged in successfully");
+          updateUI();
+        } else {
+          console.log("Failed to log in");
+          alert("Failed to login");
+        }
+      }
+
+      async function logout() {
+        console.log("Attempting to log out...");
+        const response = await fetch("/api/logoff", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ logoff: true }),
+        });
+
+        const data = await response.json();
+        if (data.result.logged_off) {
+          token = null;
+          username = null;
+          localStorage.removeItem("token");
+          localStorage.removeItem("username");
+          console.log("Logged out successfully");
+          alert("Logged out successfully");
+          updateUI();
+        } else {
+          console.log("Failed to log out");
+          alert("Failed to logout");
+        }
+      }
+
+      window.onload = updateUI;
+    </script>
+  </head>
+  <body>
+    <h1>AWESOME-APP Web</h1>
+
+    <div id="loginSection">
+      <h2>Signup</h2>
+      <input id="signupUsername" placeholder="Username" />
+      <input id="signupPassword" placeholder="Password" type="password" />
+      <button onclick="signup()">Signup</button>
+
+      <h2>Login</h2>
+      <input id="username" placeholder="Username" />
+      <input id="password" placeholder="Password" type="password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <div id="userSection" style="display: none">
+      <h2>Welcome, <span id="usernameDisplay"></span></h2>
+
+      <h2>Logout</h2>
+      <button onclick="logout()">Logout</button>
+
+      <h2>Add Task</h2>
+      <input id="taskTitle" placeholder="Task Title" />
+      <button onclick="addTask()">Add Task</button>
+
+      <h2>Remove Task</h2>
+      <input id="taskId" placeholder="Task ID" />
+      <button onclick="removeTask()">Remove Task</button>
+    </div>
+  </body>
+</html>
