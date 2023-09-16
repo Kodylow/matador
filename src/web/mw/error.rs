@@ -1,4 +1,37 @@
+use axum::response::{IntoResponse, Response};
+use reqwest::{header::InvalidHeaderValue, StatusCode};
+use serde::Serialize;
+use tracing::debug;
+
 pub type Result<T> = core::result::Result<T, Error>;
+
+#[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[serde(tag = "type", content = "data")]
+pub enum Error {
+    InvalidHeaderValue(String),
+}
+
+impl From<InvalidHeaderValue> for Error {
+    fn from(val: InvalidHeaderValue) -> Self {
+        Self::InvalidHeaderValue(format!("InvalidHeaderValue: {}", val))
+    }
+}
+
+// region:    --- Axum IntoResponse
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        debug!("{:<12} - model::Error {self:?}", "INTO_RES");
+
+        // Create a placeholder Axum reponse.
+        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
+
+        // Insert the Error into the reponse.
+        response.extensions_mut().insert(self);
+
+        response
+    }
+}
+// endregion: --- Axum IntoResponse
 
 // region:    --- Error Boilerplate
 impl core::fmt::Display for Error {

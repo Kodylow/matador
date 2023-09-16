@@ -1,12 +1,8 @@
 use crate::model::ModelManager;
 use crate::web::mw::mw_auth;
 
-use axum::body::Body;
-use axum::http::Request;
-use axum::routing::get;
 use axum::{middleware, Router};
-use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
-use reverse_proxy_service::{ReplaceAll, ReusedServiceBuilder};
+use reverse_proxy_service::TrimPrefix;
 use std::net::SocketAddr;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
@@ -43,7 +39,7 @@ async fn main() -> Result<()> {
     let config = config::config();
 
     // Initialize ModelManager.
-    let mm = ModelManager::new().await?;
+    let _mm = ModelManager::new().await?;
 
     let mut router = Router::new();
     let mut routes_set = false;
@@ -66,14 +62,27 @@ async fn main() -> Result<()> {
             .layer(middleware::from_fn(mw_auth::add_clipdrop_auth));
         routes_set = true;
     }
-    // if env::var("CLIPDROP_API_KEY").is_ok() {
-    //     router = router.nest("/clipdrop", web::routes::clipdrop::routes());
-    //     routes_set = true;
-    // }
-    // if env::var("MAKERSUITE_API_KEY").is_ok() {
-    //     router = router.nest("/makersuite", web::routes::makersuite::routes());
-    //     routes_set = true;
-    // }
+    if config.MAKERSUITE_API_KEY.is_some() {
+        let makersuite_host =
+            reverse_proxy_service::builder_https("generativelanguage.googleapis.com").unwrap();
+        router = router
+            .route_service(
+                "/makersuite/*path",
+                makersuite_host.build(TrimPrefix("/makersuite")),
+            )
+            .layer(middleware::from_fn(mw_auth::add_makersuite_auth));
+        routes_set = true;
+    }
+    if config.REPLICATE_API_KEY.is_some() {
+        let replicate_host = reverse_proxy_service::builder_https("api.replicate.com").unwrap();
+        router = router
+            .route_service(
+                "/replicate/*path",
+                replicate_host.build(TrimPrefix("/replicate")),
+            )
+            .layer(middleware::from_fn(mw_auth::add_replicate_auth));
+        routes_set = true;
+    }
 
     // Apply middleware conditionally
     // if env::var("LNADDRESS").is_ok() && env::var("MACAROON_SECRET").is_ok() {
@@ -87,6 +96,7 @@ async fn main() -> Result<()> {
     // }
 
     // Check if any routes are set
+
     if !routes_set {
         Err(Error::RouterFailToSetRoutes(
             "No routes set, check environment variables",
@@ -102,14 +112,4 @@ async fn main() -> Result<()> {
     // endregion: --- Start Server
 
     Ok(())
-}
-
-async fn log_test(req: Request<Body>) -> &'static str {
-    info!("----- Logging request from reverse proxy");
-    info!("Request: {:?}", req);
-    info!("Request Headers: {:?}", req.headers());
-    info!("Request Body: {:?}", req.body());
-    info!("----- End Logging request from reverse proxy");
-
-    "Hello, world!"
 }
