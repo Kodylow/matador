@@ -1,5 +1,3 @@
-// pub mod l402;
-// pub mod lightning_address;
-
 mod error;
-pub mod mw_auth;
+pub mod mw_add_api_auth;
+pub mod mw_l402;

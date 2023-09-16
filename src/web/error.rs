@@ -1,4 +1,4 @@
-use crate::{crypt, model, web};
+use crate::{crypt, lightning, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
@@ -9,6 +9,8 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
 pub enum Error {
+    // -- Router
+    RouterFailToSetRoutes(String),
     // -- RPC
     RpcMethodUnknown(String),
     RpcMissingParams { rpc_method: String },
@@ -28,6 +30,7 @@ pub enum Error {
     // -- Modules
     Model(model::Error),
     Crypt(crypt::Error),
+    Lightning(lightning::Error),
 
     // -- External Modules
     SerdeJson(String),
@@ -43,6 +46,12 @@ impl From<model::Error> for Error {
 impl From<crypt::Error> for Error {
     fn from(val: crypt::Error) -> Self {
         Self::Crypt(val)
+    }
+}
+
+impl From<lightning::Error> for Error {
+    fn from(val: lightning::Error) -> Self {
+        Self::Lightning(val)
     }
 }
 
