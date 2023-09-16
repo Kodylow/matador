@@ -4,6 +4,8 @@ mod error;
 
 pub use self::error::{Error, Result};
 
+use axum::http::uri::PathAndQuery;
+use axum::http::{self, HeaderValue, Request};
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
@@ -42,3 +44,48 @@ pub fn b64u_decode(b64u: &str) -> Result<String> {
     Ok(decoded_string)
 }
 // endregion: --- Base64
+
+// region:    --- Request Manipulation
+
+const HOST: &str = "host";
+const X_API_KEY: &str = "x-api-key";
+const AUTHORIZATION: &str = "authorization";
+
+pub fn remove_host_header<B>(req: &mut Request<B>) {
+    req.headers_mut().remove(HOST);
+}
+
+pub fn insert_x_api_key_header<B>(req: &mut Request<B>, auth: &str) {
+    req.headers_mut()
+        .insert(X_API_KEY, HeaderValue::from_str(auth).unwrap());
+}
+
+pub fn insert_auth_bearer_header<B>(req: &mut Request<B>, auth: &str) {
+    let auth = format!("Bearer {}", auth);
+    req.headers_mut()
+        .insert(AUTHORIZATION, HeaderValue::from_str(auth.as_str()).unwrap());
+}
+
+pub fn insert_auth_token_header<B>(req: &mut Request<B>, auth: &str) {
+    let auth = format!("Token {}", auth);
+    req.headers_mut()
+        .insert(AUTHORIZATION, HeaderValue::from_str(auth.as_str()).unwrap());
+}
+
+pub fn add_key_query_param<B>(req: &mut Request<B>, auth: &str) {
+    let mut parts = req.uri().clone().into_parts();
+    let key_param = format!("key={}", auth);
+    parts.path_and_query = Some(
+        PathAndQuery::from_maybe_shared(format!(
+            "{}?{}",
+            parts
+                .path_and_query
+                .map(|pq| pq.path().to_string())
+                .unwrap_or_default(),
+            key_param
+        ))
+        .unwrap(),
+    );
+    *req.uri_mut() = http::Uri::from_parts(parts).unwrap();
+}
+// endregion: --- Request Manipulation

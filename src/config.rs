@@ -33,9 +33,10 @@ pub struct Config {
 
     // -- AI API Keys
     pub OPENAI_API_KEY: Option<String>,
-    pub REPLICATE_API_KEY: Option<String>,
     pub PALM_API_KEY: Option<String>,
     pub CLIPDROP_API_KEY: Option<String>,
+    pub REPLICATE_API_KEY: Option<String>,
+    pub ANTHROPIC_API_KEY: Option<String>,
 }
 
 impl Config {
@@ -59,9 +60,10 @@ impl Config {
 
             // -- AI API Keys
             OPENAI_API_KEY: get_optional_env("OPENAI_API_KEY"),
-            REPLICATE_API_KEY: get_optional_env("REPLICATE_API_KEY"),
             PALM_API_KEY: get_optional_env("PALM_API_KEY"),
             CLIPDROP_API_KEY: get_optional_env("CLIPDROP_API_KEY"),
+            REPLICATE_API_KEY: get_optional_env("REPLICATE_API_KEY"),
+            ANTHROPIC_API_KEY: get_optional_env("ANTHROPIC_API_KEY"),
         })
     }
 }
