@@ -1,32 +1,54 @@
-use axum::{
-    http::status::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
+use tracing::debug;
 
-pub type Result<T> = std::result::Result<T, Error>;
+use crate::model;
 
-#[derive(Debug, Clone, strum_macros::AsRefStr)]
+pub type Result<T> = core::result::Result<T, Error>;
+
+#[derive(Debug)]
 pub enum Error {
-    // Router Errors
-    RouterError { text: String },
-    // API Error
-    ApiError { status: StatusCode, text: String },
+    // -- Config
+    ConfigMissingEnv(&'static str),
+    ConfigWrongFormat(&'static str),
 
-    // Lightning Errors
-    L402Error { status: StatusCode, text: String },
+    // -- Router
+    RouterFailToSetRoutes(&'static str),
+
+    // -- Modules
+    Model(model::Error),
 }
 
-// Note: never ever pass through a server error to the client
+// region:    --- Froms
+impl From<model::Error> for Error {
+    fn from(val: model::Error) -> Self {
+        Self::Model(val)
+    }
+}
+// endregion: --- Froms
+
+// region:    --- Axum IntoResponse
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        println!("Error: {:?}", self);
+        debug!("{:<12} - model::Error {self:?}", "INTO_RES");
 
-        // Create a placeholder Axum response
+        // Create a placeholder Axum reponse.
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
 
-        // Insert the error into the response
+        // Insert the Error into the reponse.
         response.extensions_mut().insert(self);
 
         response
     }
 }
+// endregion: --- Axum IntoResponse
+
+// region:    --- Error Boilerplate
+impl core::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
+        write!(fmt, "{self:?}")
+    }
+}
+
+impl std::error::Error for Error {}
+// endregion: --- Error Boilerplate
