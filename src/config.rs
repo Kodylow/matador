@@ -1,3 +1,5 @@
+use macaroon::MacaroonKey;
+
 use crate::{Error, Result};
 use std::env;
 use std::str::FromStr;
@@ -16,9 +18,9 @@ pub fn config() -> &'static Config {
 pub struct Config {
     // -- Crypt
     pub PWD_KEY: Vec<u8>,
-
     pub TOKEN_KEY: Vec<u8>,
     pub TOKEN_DURATION_SEC: f64,
+    pub MACAROON_KEY: MacaroonKey,
 
     // -- Db
     pub DB_URL: String,
@@ -32,7 +34,7 @@ pub struct Config {
     // -- AI API Keys
     pub OPENAI_API_KEY: Option<String>,
     pub REPLICATE_API_KEY: Option<String>,
-    pub MAKERSUITE_API_KEY: Option<String>,
+    pub PALM_API_KEY: Option<String>,
     pub CLIPDROP_API_KEY: Option<String>,
 }
 
@@ -44,6 +46,7 @@ impl Config {
 
             TOKEN_KEY: get_env_b64u_as_u8s("SERVICE_TOKEN_KEY")?,
             TOKEN_DURATION_SEC: get_env_parse("SERVICE_TOKEN_DURATION_SEC")?,
+            MACAROON_KEY: get_env_parse_to_macaroon_key("SERVICE_MACAROON_KEY")?,
 
             // -- Db
             DB_URL: get_env("SERVICE_DB_URL")?,
@@ -57,7 +60,7 @@ impl Config {
             // -- AI API Keys
             OPENAI_API_KEY: get_optional_env("OPENAI_API_KEY"),
             REPLICATE_API_KEY: get_optional_env("REPLICATE_API_KEY"),
-            MAKERSUITE_API_KEY: get_optional_env("MAKERSUITE_API_KEY"),
+            PALM_API_KEY: get_optional_env("PALM_API_KEY"),
             CLIPDROP_API_KEY: get_optional_env("CLIPDROP_API_KEY"),
         })
     }
@@ -78,4 +81,11 @@ fn get_env_parse<T: FromStr>(name: &'static str) -> Result<T> {
 
 fn get_env_b64u_as_u8s(name: &'static str) -> Result<Vec<u8>> {
     base64_url::decode(&get_env(name)?).map_err(|_| Error::ConfigWrongFormat(name))
+}
+
+fn get_env_parse_to_macaroon_key(name: &'static str) -> Result<MacaroonKey> {
+    let key = get_env(name)?;
+    let mac_key = MacaroonKey::generate(&key.as_bytes());
+
+    Ok(mac_key)
 }

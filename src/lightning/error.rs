@@ -1,25 +1,23 @@
 use serde::Serialize;
 
+use crate::crypt;
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Serialize)]
 pub enum Error {
-    // -- Key
-    KeyFailHmac,
+    // -- Lightning
+    L402CaveatFail,
+    L402AuthHeaderInvalidFail,
 
-    // -- Pwd
-    PwdNotMatching,
+    // -- Modules
+    Crypt(crypt::Error),
+}
 
-    // -- Token
-    TokenInvalidFormat,
-    TokenCannotDecodeIdent,
-    TokenCannotDecodeExp,
-    TokenSignatureNotMatching,
-    TokenExpNotIso,
-    TokenExpired,
-
-    // -- Macaroon
-    MacaroonCaveatFail,
+impl From<crypt::Error> for Error {
+    fn from(val: crypt::Error) -> Self {
+        Self::Crypt(val)
+    }
 }
 
 // region:    --- Error Boilerplate

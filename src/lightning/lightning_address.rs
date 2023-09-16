@@ -48,10 +48,10 @@ impl LightningAddress {
         serde_json::from_str(&res.text().await.unwrap()).expect("Failed to parse response")
     }
 
-    pub async fn get_invoice(&self) -> Bolt11Invoice {
+    pub async fn get_invoice(&self, amount_msat: i64) -> Bolt11Invoice {
         let client = Client::new();
         let callback_res = client
-            .get(format!("{}?amount=1000", self.callback))
+            .get(format!("{}?amount={}", self.callback, amount_msat))
             .send()
             .await
             .expect("Failed to send callback request");
