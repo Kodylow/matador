@@ -10,7 +10,7 @@ use super::mw::mw_l402::mw_l402;
 pub fn setup_router() -> Result<Router> {
     let router = Router::new();
     let router = set_api_proxy_routes(router)?;
-    // let router = set_l402_wrapper(router)?;
+    let router = set_l402_wrapper(router)?;
 
     Ok(router)
 }

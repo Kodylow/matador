@@ -7,6 +7,7 @@ use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 
 #[derive(Clone, Serialize)]
+#[allow(dead_code)]
 enum Op {
     Eq,
     Ne,
@@ -40,6 +41,7 @@ pub trait DbBmc {
     const TABLE: &'static str;
 }
 
+#[allow(dead_code)]
 pub async fn create<MC, E>(_ctx: &Ctx, mm: &ModelManager, data: E) -> Result<i64>
 where
     MC: DbBmc,
@@ -58,6 +60,7 @@ where
     Ok(id)
 }
 
+#[allow(dead_code)]
 pub async fn get<MC, E>(_ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<E>
 where
     MC: DbBmc,
@@ -80,6 +83,7 @@ where
     Ok(entity)
 }
 
+#[allow(dead_code)]
 pub async fn get_by_conditions<MC, E>(
     _ctx: &Ctx,
     mm: &ModelManager,
@@ -110,6 +114,7 @@ where
     Ok(entity)
 }
 
+#[allow(dead_code)]
 pub async fn list<MC, E>(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<E>>
 where
     MC: DbBmc,
@@ -128,6 +133,7 @@ where
     Ok(entities)
 }
 
+#[allow(dead_code)]
 pub async fn update<MC, E>(_ctx: &Ctx, mm: &ModelManager, id: i64, data: E) -> Result<()>
 where
     MC: DbBmc,
@@ -153,6 +159,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 pub async fn delete<MC>(_ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()>
 where
     MC: DbBmc,

@@ -4,10 +4,12 @@ use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 use tracing::debug;
 
+#[allow(dead_code)]
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
+#[allow(dead_code)]
 pub enum Error {
     // -- Router
     RouterFailToSetRoutes(String),
@@ -91,6 +93,7 @@ impl std::error::Error for Error {}
 // region:    --- Client Error
 
 /// From the root error to the http status code and ClientError
+#[allow(dead_code)]
 impl Error {
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
         use web::Error::*;
@@ -122,7 +125,7 @@ impl Error {
 
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "message", content = "detail")]
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 pub enum ClientError {
     LOGIN_FAIL,
     NO_AUTH,

@@ -39,6 +39,7 @@ impl DbBmc for BalanceBmc {
     const TABLE: &'static str = "balance";
 }
 
+#[allow(dead_code)]
 impl BalanceBmc {
     pub async fn create(ctx: &Ctx, mm: &ModelManager, balance_c: BalanceForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, balance_c).await
