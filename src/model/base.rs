@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::{Error, Result};

@@ -1,13 +1,11 @@
-use std::env;
-
 use crate::crypt;
 
 use super::error::{Error, Result};
 use super::LightningAddress;
-use axum::http::StatusCode;
+
 use lightning_invoice::Bolt11Invoice;
-use macaroon::{Format, Macaroon, MacaroonKey, Verifier};
-use sha2::{Digest, Sha256};
+use macaroon::{Format, Macaroon};
+use sha2::Digest;
 
 pub struct L402 {
     token: Macaroon,

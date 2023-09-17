@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::crypt;
 use crate::model::store;
 use serde::Serialize;

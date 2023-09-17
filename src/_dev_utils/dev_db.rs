@@ -48,8 +48,8 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // -- Init model layer.
-    let mm = ModelManager::new().await?;
-    let ctx = Ctx::root_ctx();
+    let _mm = ModelManager::new().await?;
+    let _ctx = Ctx::root_ctx();
 
     // // -- Set balances
     // let balance_seeds = vec![]

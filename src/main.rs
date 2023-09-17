@@ -1,7 +1,5 @@
 use crate::model::ModelManager;
 
-use axum::{middleware, Router};
-use reverse_proxy_service::TrimPrefix;
 use std::net::SocketAddr;
 use tracing::info;
 use tracing_subscriber::EnvFilter;

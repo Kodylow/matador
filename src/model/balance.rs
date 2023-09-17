@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 use sqlb::{Fields, HasFields};
 use sqlx::FromRow;
@@ -7,7 +5,7 @@ use sqlx::FromRow;
 use crate::ctx::Ctx;
 
 use super::base::{self, Condition};
-use super::error::{Error, Result};
+use super::error::Result;
 use super::{base::DbBmc, ModelManager};
 
 // region:    --- Balance Types
@@ -59,7 +57,7 @@ impl BalanceBmc {
     }
 
     pub async fn get_by_token(
-        ctx: &Ctx,
+        _ctx: &Ctx,
         mm: &ModelManager,
         token: String,
     ) -> Result<Option<Balance>> {
@@ -89,7 +87,7 @@ impl BalanceBmc {
     }
 
     pub async fn update_by_token(
-        ctx: &Ctx,
+        _ctx: &Ctx,
         mm: &ModelManager,
         token: String,
         balance_u: BalanceForUpdate,
@@ -111,7 +109,7 @@ impl BalanceBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 
-    pub async fn delete_by_token(ctx: &Ctx, mm: &ModelManager, token: String) -> Result<()> {
+    pub async fn delete_by_token(_ctx: &Ctx, mm: &ModelManager, token: String) -> Result<()> {
         let db = mm.db();
 
         sqlb::delete()
