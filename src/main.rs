@@ -1,3 +1,5 @@
+#![allow(unused)] // For early development.
+
 use crate::model::ModelManager;
 
 use std::net::SocketAddr;
