@@ -37,6 +37,9 @@ pub struct Config {
     pub CLIPDROP_API_KEY: Option<String>,
     pub REPLICATE_API_KEY: Option<String>,
     pub ANTHROPIC_API_KEY: Option<String>,
+
+    // -- Replit Dynamic API Key
+    pub REPLIT_API_KEY: Option<String>,
 }
 
 impl Config {
@@ -64,6 +67,9 @@ impl Config {
             CLIPDROP_API_KEY: get_optional_env("CLIPDROP_API_KEY"),
             REPLICATE_API_KEY: get_optional_env("REPLICATE_API_KEY"),
             ANTHROPIC_API_KEY: get_optional_env("ANTHROPIC_API_KEY"),
+
+            // -- Replit Dynamic API Key
+            REPLIT_API_KEY: get_optional_replit_key(),
         })
     }
 }
@@ -91,3 +97,6 @@ fn get_env_parse_to_macaroon_key(name: &'static str) -> Result<MacaroonKey> {
 
     Ok(mac_key)
 }
+
+fn get_optional_replit_key() -> Option<String> {
+    
