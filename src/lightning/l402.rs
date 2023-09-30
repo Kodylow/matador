@@ -53,7 +53,11 @@ impl L402 {
             return Err(Error::L402AuthHeaderInvalidFail);
         }
 
-        let token = Macaroon::deserialize(macaroon_preimage[0].to_string()).unwrap();
+        let token = match Macaroon::deserialize(macaroon_preimage[0].to_string()) {
+            Ok(token) => token,
+            Err(_) => return Err(Error::L402AuthHeaderInvalidFail),
+        };
+        
         let preimage = Some(macaroon_preimage[1].to_string());
 
         Ok(L402 {

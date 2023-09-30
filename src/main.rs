@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     // _dev_utils::init_dev().await;
 
     // Initialize ModelManager.
-    let _mm = ModelManager::new().await?;
+    // let _mm = ModelManager::new().await?;
 
     let router = web::router::setup_router()?;
 
@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
     //     });
     // }
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     info!("Server listening on {addr}");
     axum::Server::bind(&addr)
         .serve(router.into_make_service())

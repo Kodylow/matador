@@ -19,6 +19,7 @@ pub enum Auth {
     Palm,
     Replicate,
     Anthropic,
+    Replit,
 }
 
 impl Auth {
@@ -29,6 +30,7 @@ impl Auth {
             Auth::Palm => config().PALM_API_KEY.as_ref().unwrap(),
             Auth::Replicate => config().REPLICATE_API_KEY.as_ref().unwrap(),
             Auth::Anthropic => config().ANTHROPIC_API_KEY.as_ref().unwrap(),
+            Auth::Replit => config().REPLIT_API_KEY.as_ref().unwrap(),
         }
     }
 
@@ -39,6 +41,7 @@ impl Auth {
             Auth::Palm => palm_auth,
             Auth::Replicate => replicate_auth,
             Auth::Anthropic => anthropic_auth,
+            Auth::Replit => replit_auth,
         }
     }
 }
@@ -56,6 +59,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         "palm" => Auth::Palm,
         "replicate" => Auth::Replicate,
         "anthropic" => Auth::Anthropic,
+        "replit" => Auth::Replit,
         _ => {
             info!("No auth found for this route");
             return Err(Error::InvalidRoute(
@@ -94,4 +98,8 @@ fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
         "anthropic-version",
         HeaderValue::from_str("2023-06-01").unwrap(),
     );
+}
+
+fn replit_auth<B>(req: &mut Request<B>, auth: &str) {
+    insert_auth_bearer_header(req, auth);
 }

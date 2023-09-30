@@ -2,6 +2,7 @@
 
 use crate::error::{Error, Result};
 use axum::{middleware, Router};
+use axum::routing::get;
 use reverse_proxy_service::TrimPrefix;
 
 use super::mw::mw_add_api_auth::add_auth;
@@ -16,8 +17,15 @@ pub fn setup_router() -> Result<Router> {
 }
 
 fn set_l402_wrapper(mut router: Router) -> Result<Router> {
-    router = router.layer(middleware::from_fn(mw_l402));
+    router = router
+        .route("/", get(root))
+        .layer(middleware::from_fn(mw_l402));
     Ok(router)
+}
+
+
+async fn root() -> &'static str {
+    "Hello, World!"
 }
 
 /// This is where you add routes for each API key set in config
@@ -35,6 +43,7 @@ enum Route {
     Palm,
     Replicate,
     Anthropic,
+    Replit,
 }
 
 impl Route {
@@ -45,6 +54,7 @@ impl Route {
             Route::Palm => "generativelanguage.googleapis.com",
             Route::Replicate => "api.replicate.com",
             Route::Anthropic => "api.anthropic.com",
+            Route::Replit => "production-modelfarm.replit.com",
         }
     }
 
@@ -55,6 +65,7 @@ impl Route {
             Route::Palm => "/palm",
             Route::Replicate => "/replicate",
             Route::Anthropic => "/anthropic",
+            Route::Replit => "/replit",
         }
     }
 }
@@ -99,6 +110,9 @@ fn get_routes_per_api_keys_set() -> Vec<Route> {
     }
     if crate::config::config().ANTHROPIC_API_KEY.is_some() {
         routes.push(Route::Anthropic);
+    }
+    if crate::config::config().REPLIT_API_KEY.is_some() {
+        routes.push(Route::Replit);
     }
 
     routes

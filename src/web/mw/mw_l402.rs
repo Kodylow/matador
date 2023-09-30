@@ -33,6 +33,7 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
                     WWW_AUTHENTICATE,
                     HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
                 );
+                
                 Ok(res)
             }
         }

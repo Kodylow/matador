@@ -4,6 +4,7 @@ use crate::{Error, Result};
 use std::env;
 use std::str::FromStr;
 use std::sync::OnceLock;
+use std::process::Command;
 
 pub fn config() -> &'static Config {
     static INSTANCE: OnceLock<Config> = OnceLock::new();
@@ -99,4 +100,26 @@ fn get_env_parse_to_macaroon_key(name: &'static str) -> Result<MacaroonKey> {
 }
 
 fn get_optional_replit_key() -> Option<String> {
+    // Replit Dynamic API Key
+    // Get the Replit Key by executing python ../../replit/get_token.py
+    println!(
+        "Replit Dynamic API Key ...");
+    let proc = Command::new("python")
+        .arg("/home/runner/matador-replit/replit/get_token.py")
+        .output()
+        .expect("Failed to execute Get Replit API KEY process");
+    let proc_stdout = String::from_utf8_lossy(&proc.stdout);
+
+    println!("Here {:?}", &proc_stdout);
+    if proc_stdout.is_empty() {
+        return None;
+    }
+
+    let proc_stdout = proc_stdout.trim();
+
+    println!("Replit Dynamic API Key: {}", proc_stdout);
+
+    Some(proc_stdout.to_string())
+
+}
     
