@@ -43,7 +43,8 @@ pub struct ApisConfig {
     pub replicate: ApiParams,
     pub anthropic: ApiParams,
     pub stability: ApiParams,
-    pub replit: Mutex<ApiParams>,
+    pub goose: ApiParams,
+    // pub replit: Mutex<ApiParams>,
 }
 
 pub fn apis_config() -> &'static ApisConfig {
@@ -95,12 +96,18 @@ impl ApisConfig {
                 "/stability",
                 None,
             ),
-            replit: Mutex::new(ApiParams::new(
-                replit_key.unwrap().lock().unwrap().clone().into(),
-                "production-modelfarm.replit.com",
-                "/replit",
-                replit_timeout,
-            )),
+            goose: ApiParams::new(
+                get_optional_env("GOOSE_API_KEY"),
+                "api.goose.ai",
+                "/goose",
+                None,
+            ),
+            // replit: Mutex::new(ApiParams::new(
+            //     replit_key.unwrap().lock().unwrap().clone().into(),
+            //     "production-modelfarm.replit.com",
+            //     "/replit",
+            //     replit_timeout,
+            // )),
         })
     }
 
@@ -112,23 +119,24 @@ impl ApisConfig {
             "replicate" => Some(self.replicate.clone()),
             "anthropic" => Some(self.anthropic.clone()),
             "stability" => Some(self.stability.clone()),
-            "replit" => Some(self.replit.lock().unwrap().clone()),
+            "goose" => Some(self.goose.clone()),
+            // "replit" => Some(self.replit.lock().unwrap().clone()),
             _ => None,
         }
     }
 
-    pub fn get_replit_key(&self) -> Option<String> {
-        if self.is_replit_key_expired() {
-            regenerate_replit_key();
-        }
-        self.replit.lock().unwrap().key.clone()
-    }
+    // pub fn get_replit_key(&self) -> Option<String> {
+    //     if self.is_replit_key_expired() {
+    //         regenerate_replit_key();
+    //     }
+    //     self.replit.lock().unwrap().key.clone()
+    // }
 
-    pub fn is_replit_key_expired(&self) -> bool {
-        self.replit.lock().unwrap().timeout.is_none()
-            || self.replit.lock().unwrap().timeout.unwrap()
-                <= OffsetDateTime::now_utc().unix_timestamp()
-    }
+    // pub fn is_replit_key_expired(&self) -> bool {
+    //     self.replit.lock().unwrap().timeout.is_none()
+    //         || self.replit.lock().unwrap().timeout.unwrap()
+    //             <= OffsetDateTime::now_utc().unix_timestamp()
+    // }
 }
 
 fn get_optional_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
@@ -140,13 +148,13 @@ fn get_optional_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
     generate_replit_key()
 }
 
-pub fn regenerate_replit_key() {
-    let conf = apis_config();
-    let (new_key, new_timeout) = generate_replit_key();
-    let mut replit = conf.replit.lock().unwrap();
-    replit.key = new_key.unwrap().lock().unwrap().clone().into();
-    replit.timeout = new_timeout;
-}
+// pub fn regenerate_replit_key() {
+//     let conf = apis_config();
+//     let (new_key, new_timeout) = generate_replit_key();
+//     let mut replit = conf.replit.lock().unwrap();
+//     replit.key = new_key.unwrap().lock().unwrap().clone().into();
+//     replit.timeout = new_timeout;
+// }
 
 fn generate_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
     println!("Replit Dynamic API Key ...");
