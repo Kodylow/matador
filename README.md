@@ -1,7 +1,6 @@
 # Matador: A Bitcoin-Powered Passthrough Server
 
 Matador lets you sell API access against an arbitrary API using your API Key in exchange for bitcoin micropayments via L402 Payment Required Codes. 
-This project is a reimplementation of the existing [Matador server](https://github.com/Kodylow/matador) to Rust.
 
 I built Matador because I'm sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an L402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.
 
