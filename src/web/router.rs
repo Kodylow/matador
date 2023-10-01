@@ -53,41 +53,22 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
 fn get_params_per_api_keys_set() -> Vec<ApiParams> {
     let api_configs = apis_config();
 
-    let mut routes = Vec::new();
+    let api_params = [
+        &api_configs.openai,
+        &api_configs.clipdrop,
+        &api_configs.palm,
+        &api_configs.replicate,
+        &api_configs.anthropic,
+        &api_configs.stability,
+        &api_configs.goose,
+        &api_configs.cohere,
+        &api_configs.ai21,
+        &api_configs.together,
+        // &api_configs.replit.lock().unwrap(),
+    ];
 
-    if let Some(key) = &api_configs.openai.key {
-        routes.push(api_configs.openai.clone());
-    }
-    if let Some(key) = &api_configs.clipdrop.key {
-        routes.push(api_configs.clipdrop.clone());
-    }
-    if let Some(key) = &api_configs.palm.key {
-        routes.push(api_configs.palm.clone());
-    }
-    if let Some(key) = &api_configs.replicate.key {
-        routes.push(api_configs.replicate.clone());
-    }
-    if let Some(key) = &api_configs.anthropic.key {
-        routes.push(api_configs.anthropic.clone());
-    }
-    if let Some(key) = &api_configs.stability.key {
-        routes.push(api_configs.stability.clone());
-    }
-    if let Some(key) = &api_configs.goose.key {
-        routes.push(api_configs.goose.clone());
-    }
-    if let Some(key) = &api_configs.cohere.key {
-        routes.push(api_configs.cohere.clone());
-    }
-    if let Some(key) = &api_configs.ai21.key {
-        routes.push(api_configs.ai21.clone());
-    }
-    if let Some(key) = &api_configs.together.key {
-        routes.push(api_configs.together.clone());
-    }
-    // if let Some(key) = &api_configs.get_replit_key() {
-    //     routes.push(api_configs.replit.lock().unwrap().clone());
-    // }
-
-    routes
+    api_params
+        .iter()
+        .filter_map(|api_param| api_param.as_ref().cloned())
+        .collect()
 }

@@ -21,8 +21,9 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
     info!("first_path_segment: {}", first_path_segment);
 
     let api_config = apis_config().get_params(first_path_segment);
+    println!("api_config: {:?}", api_config);
     let key = match api_config {
-        Some(a) => a.key.clone().unwrap(),
+        Some(a) => a.key.clone(),
         None => {
             info!("No key found for this route");
             return Err(Error::InvalidRoute(
