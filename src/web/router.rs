@@ -73,6 +73,9 @@ fn get_params_per_api_keys_set() -> Vec<ApiParams> {
     if let Some(key) = &api_configs.stability.key {
         routes.push(api_configs.stability.clone());
     }
+    if let Some(key) = &api_configs.goose.key {
+        routes.push(api_configs.goose.clone());
+    }
     // if let Some(key) = &api_configs.get_replit_key() {
     //     routes.push(api_configs.replit.lock().unwrap().clone());
     // }
