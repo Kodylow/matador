@@ -45,6 +45,7 @@ pub struct ApisConfig {
     pub stability: ApiParams,
     pub goose: ApiParams,
     pub cohere: ApiParams,
+    pub ai21: ApiParams,
     // pub replit: Mutex<ApiParams>,
 }
 
@@ -59,6 +60,7 @@ pub fn apis_config() -> &'static ApisConfig {
 
 impl ApisConfig {
     fn load_from_env() -> Result<ApisConfig> {
+        dotenv::dotenv().ok();
         let (replit_key, replit_timeout) = get_optional_replit_key();
         Ok(ApisConfig {
             openai: ApiParams::new(
@@ -109,6 +111,12 @@ impl ApisConfig {
                 "/cohere",
                 None,
             ),
+            ai21: ApiParams::new(
+                get_optional_env("AI21_API_KEY"),
+                "api.ai21.com",
+                "/ai21",
+                None,
+            ),
             // replit: Mutex::new(ApiParams::new(
             //     replit_key.unwrap().lock().unwrap().clone().into(),
             //     "production-modelfarm.replit.com",
@@ -128,6 +136,7 @@ impl ApisConfig {
             "stability" => Some(self.stability.clone()),
             "goose" => Some(self.goose.clone()),
             "cohere" => Some(self.cohere.clone()),
+            "ai21" => Some(self.ai21.clone()),
             // "replit" => Some(self.replit.lock().unwrap().clone()),
             _ => None,
         }

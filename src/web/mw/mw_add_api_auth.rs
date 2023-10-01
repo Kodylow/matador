@@ -18,7 +18,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
     remove_host_header(&mut req);
 
     let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
-    println!("first_path_segment: {}", first_path_segment);
+    info!("first_path_segment: {}", first_path_segment);
 
     let api_config = apis_config().get_params(first_path_segment);
     let key = match api_config {
@@ -39,6 +39,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         "stability" => bearer_auth,
         "goose" => bearer_auth,
         "cohere" => bearer_auth,
+        "ai21" => bearer_auth,
         // "replit" => bearer_auth,
         _ => {
             info!("No auth found for this route");
