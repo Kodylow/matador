@@ -1,7 +1,7 @@
 use macaroon::{Macaroon, MacaroonKey, Verifier};
 
 use super::error::{Error, Result};
-use crate::config::config;
+use crate::config::config::config;
 
 pub fn generate_macaroon(payment_hash: String) -> Macaroon {
     _generate_macaroon(payment_hash, &config().MACAROON_KEY)

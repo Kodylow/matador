@@ -1,5 +1,5 @@
 use super::{Error, Result};
-use crate::config::config;
+use crate::config::config::config;
 use crate::crypt::{encrypt_into_b64u, EncryptContent};
 
 const DEFAULT_PWD_SCHEME: &str = "01";

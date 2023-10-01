@@ -1,6 +1,6 @@
 // src/router.rs
 
-use crate::config::ApiConfig;
+use crate::config::apis::{apis_config, ApiParams, ApisConfig};
 use crate::error::{Error, Result};
 use axum::routing::get;
 use axum::{middleware, Router};
@@ -28,64 +28,19 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-/// This is where you add routes for each API key set in config
-/// If no API keys are set, this will return an error
-/// To add a new API:
-/// 1. Add a new Route enum variant with the host and path
-/// 2. Add the new Route to the routes vector
-/// 3. Add a new match arm to the add_auth middleware (mw_add_api_auth.rs, you have to add an auth function for the new API)
-/// 4. Add a new match arm to the set_api_proxy_routes function (this file)
-
-#[derive(Clone)]
-enum Route {
-    OpenAI,
-    ClipDrop,
-    Palm,
-    Replicate,
-    Anthropic,
-    Stability,
-    Replit,
-}
-
-impl Route {
-    fn host(&self) -> &'static str {
-        match self {
-            Route::OpenAI => "api.openai.com",
-            Route::ClipDrop => "clipdrop-api.co",
-            Route::Palm => "generativelanguage.googleapis.com",
-            Route::Replicate => "api.replicate.com",
-            Route::Anthropic => "api.anthropic.com",
-            Route::Stability => "api.stability.ai",
-            Route::Replit => "production-modelfarm.replit.com",
-        }
-    }
-
-    fn path(&self) -> &'static str {
-        match self {
-            Route::OpenAI => "/openai",
-            Route::ClipDrop => "/clipdrop",
-            Route::Palm => "/palm",
-            Route::Replicate => "/replicate",
-            Route::Anthropic => "/anthropic",
-            Route::Stability => "/stability",
-            Route::Replit => "/replit",
-        }
-    }
-}
-
 fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
-    let routes = get_routes_per_api_keys_set();
+    let params = get_params_per_api_keys_set();
 
-    if routes.is_empty() {
+    if params.is_empty() {
         return Err(Error::RouterFailToSetRoutes(
             "No routes set, check environment variables".into(),
         ));
     }
 
-    for route in &routes {
-        let host = reverse_proxy_service::builder_https(route.host).unwrap();
-        let service = host.build(TrimPrefix(route.path));
-        let subrouter = Router::new().nest_service(route.path, service);
+    for p in &params {
+        let host = reverse_proxy_service::builder_https(p.host).unwrap();
+        let service = host.build(TrimPrefix(p.path));
+        let subrouter = Router::new().nest_service(p.path, service);
 
         router = router.nest("/", subrouter);
     }
@@ -95,14 +50,31 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
     Ok(router)
 }
 
-fn get_routes_per_api_keys_set() -> Vec<ApiConfig> {
-    let api_configs = crate::config::config().get_api_configs();
-    let mut routes: Vec<ApiConfig> = vec![];
+fn get_params_per_api_keys_set() -> Vec<ApiParams> {
+    let api_configs = apis_config();
 
-    for (api_name, api_config) in api_configs {
-        if api_config.key.is_some() {
-            routes.push(api_config);
-        }
+    let mut routes = Vec::new();
+
+    if let Some(key) = &api_configs.openai.key {
+        routes.push(api_configs.openai.clone());
+    }
+    if let Some(key) = &api_configs.clipdrop.key {
+        routes.push(api_configs.clipdrop.clone());
+    }
+    if let Some(key) = &api_configs.palm.key {
+        routes.push(api_configs.palm.clone());
+    }
+    if let Some(key) = &api_configs.replicate.key {
+        routes.push(api_configs.replicate.clone());
+    }
+    if let Some(key) = &api_configs.anthropic.key {
+        routes.push(api_configs.anthropic.clone());
+    }
+    if let Some(key) = &api_configs.stability.key {
+        routes.push(api_configs.stability.clone());
+    }
+    if let Some(key) = &api_configs.get_replit_key() {
+        routes.push(api_configs.replit.lock().unwrap().clone());
     }
 
     routes

@@ -16,8 +16,6 @@ mod model;
 mod utils;
 mod web;
 
-mod _dev_utils;
-
 pub use self::error::{Error, Result};
 
 #[tokio::main]
