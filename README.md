@@ -5,20 +5,25 @@ This project is a reimplementation of the existing [Matador server](https://gith
 
 I built Matador because I'm sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an L402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.
 
-This first version of Matador is configured to run against the OPENAI API and currently supports the following endpoints:
+Matador currently supports the following APIs. To use them, you simply change the server_root_url to the corresponding matador_url and hit it exactly as you would 
 
 ```bash
-POST $API_ROOT/v1/chat/completions
-GET $API_ROOT/v1/images/generations
-GET $API_ROOT/v1/models
-GET $API_ROOT/v1/models/{model}
-POST $API_ROOT/v1/embeddings
+OpenAI: api.openai.com -> matador_url/openai
+ClipDrop: cipdrop-api.co -> matador_url/clipdrop
+Palm: generativelanguage.googleapis.com -> matador_url/palm
+Replicate: api.replicate.com -> matador_url/replicate
+Anthropic: api.anthropic.com -> matador_url/anthropic
+Stability: api.stabiliy.ai -> matador_url/stability
+Goose: api.goose.ai -> matador_url/goose
+Cohere: api.cohere.ai -> matador_url/cohere
+AI21: api.ai21.com -> matador_url/ai21
+Replit Modelfarm: production-modelfarm.replit.com -> matador_url/replit
 ```
 
 You can try it out by hitting exactly like you would hit against `https://api.openai.com` but without the OpenAI Authentication Header:
 
 ```bash
-curl -k -v http://localhost:8080/v1/chat/completions \
+curl -k -v http://localhost:8080/openai/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-3.5-turbo",
@@ -35,16 +40,14 @@ Www-Authenticate: L402 token=48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW5
 Pay the lightning invoice to get the preimage and add retry the same request with the L402 authorization header:
 
 ```bash
-curl -k -v http://localhost:8080/v1/chat/completions   -H "Content-Type: application/json" -H "Authorization: L402 48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE:7660c22f7e59fba0bfce676f666bc0bb81286e8594028c7d4f8715b7d8e48297"  -d '{                            "model": "gpt-3.5-turbo",
+curl -k -v http://localhost:8080/openai/v1/chat/completions   -H "Content-Type: application/json" -H "Authorization: L402 48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE:7660c22f7e59fba0bfce676f666bc0bb81286e8594028c7d4f8715b7d8e48297"  -d '{                            "model": "gpt-3.5-turbo",
     "messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Hello!"}]
   }'
 ```
 
 And you'll get the standard API response from the service you're hitting against.
 
-Olé!! You just paid bitcoin to hit the OpenAI API. Now it's actually open to all!
-
-Support for the other endpoints for audio, embeddings, and images will be added over the next few days.
+Olé!! You just paid bitcoin to hit the API.
 
 Matador passes the request through exactly as if you were hitting against the actual API, replacing the L402 Authorization Header the client hits against matador with your API key. Clients pay you in Bitcoin, you pay the API service with your credit card.
 
