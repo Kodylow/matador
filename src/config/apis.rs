@@ -46,6 +46,7 @@ pub struct ApisConfig {
     pub goose: ApiParams,
     pub cohere: ApiParams,
     pub ai21: ApiParams,
+    pub together: ApiParams,
     // pub replit: Mutex<ApiParams>,
 }
 
@@ -117,6 +118,12 @@ impl ApisConfig {
                 "/ai21",
                 None,
             ),
+            together: ApiParams::new(
+                get_optional_env("TOGETHER_API_KEY"),
+                "api.together.xyz",
+                "/together",
+                None,
+            ),
             // replit: Mutex::new(ApiParams::new(
             //     replit_key.unwrap().lock().unwrap().clone().into(),
             //     "production-modelfarm.replit.com",
@@ -137,6 +144,7 @@ impl ApisConfig {
             "goose" => Some(self.goose.clone()),
             "cohere" => Some(self.cohere.clone()),
             "ai21" => Some(self.ai21.clone()),
+            "together" => Some(self.together.clone()),
             // "replit" => Some(self.replit.lock().unwrap().clone()),
             _ => None,
         }

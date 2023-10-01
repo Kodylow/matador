@@ -40,6 +40,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         "goose" => bearer_auth,
         "cohere" => bearer_auth,
         "ai21" => bearer_auth,
+        "together" => bearer_auth,
         // "replit" => bearer_auth,
         _ => {
             info!("No auth found for this route");
