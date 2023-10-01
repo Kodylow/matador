@@ -44,6 +44,7 @@ pub struct ApisConfig {
     pub anthropic: ApiParams,
     pub stability: ApiParams,
     pub goose: ApiParams,
+    pub cohere: ApiParams,
     // pub replit: Mutex<ApiParams>,
 }
 
@@ -102,6 +103,12 @@ impl ApisConfig {
                 "/goose",
                 None,
             ),
+            cohere: ApiParams::new(
+                get_optional_env("COHERE_API_KEY"),
+                "api.cohere.ai",
+                "/cohere",
+                None,
+            ),
             // replit: Mutex::new(ApiParams::new(
             //     replit_key.unwrap().lock().unwrap().clone().into(),
             //     "production-modelfarm.replit.com",
@@ -120,6 +127,7 @@ impl ApisConfig {
             "anthropic" => Some(self.anthropic.clone()),
             "stability" => Some(self.stability.clone()),
             "goose" => Some(self.goose.clone()),
+            "cohere" => Some(self.cohere.clone()),
             // "replit" => Some(self.replit.lock().unwrap().clone()),
             _ => None,
         }
