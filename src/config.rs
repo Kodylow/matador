@@ -45,6 +45,7 @@ pub struct Config {
     pub CLIPDROP_API_KEY: Option<String>,
     pub REPLICATE_API_KEY: Option<String>,
     pub ANTHROPIC_API_KEY: Option<String>,
+    pub STABILITY_API_KEY: Option<String>,
 
     // -- Replit Dynamic API Key
     pub REPLIT_API_KEY: Option<String>,
@@ -77,6 +78,7 @@ impl Config {
             CLIPDROP_API_KEY: get_optional_env("CLIPDROP_API_KEY"),
             REPLICATE_API_KEY: get_optional_env("REPLICATE_API_KEY"),
             ANTHROPIC_API_KEY: get_optional_env("ANTHROPIC_API_KEY"),
+            STABILITY_API_KEY: get_optional_env("STABILITY_API_KEY"),
 
             // -- Replit Dynamic API Key
             REPLIT_API_KEY: replit_key,
