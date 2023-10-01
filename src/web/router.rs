@@ -5,6 +5,7 @@ use crate::error::{Error, Result};
 use axum::routing::get;
 use axum::{middleware, Router};
 use reverse_proxy_service::TrimPrefix;
+use tracing::info;
 
 use super::mw::mw_add_api_auth::add_auth;
 use super::mw::mw_l402::mw_l402;
@@ -21,6 +22,8 @@ fn set_l402_wrapper(mut router: Router) -> Result<Router> {
     router = router
         .route("/", get(root))
         .layer(middleware::from_fn(mw_l402));
+
+    info!("Setting l402 wrapper");
     Ok(router)
 }
 
@@ -42,6 +45,8 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
         let service = host.build(TrimPrefix(p.path));
         let subrouter = Router::new().nest_service(p.path, service);
 
+        info!("Setting routing for service: {}", p.path);
+
         router = router.nest("/", subrouter);
     }
 
@@ -53,6 +58,10 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
 fn get_params_per_api_keys_set() -> Vec<ApiParams> {
     let api_configs = apis_config();
 
+    let replit = api_configs
+        .replit
+        .as_ref()
+        .map(|r| r.lock().unwrap().clone());
     let api_params = [
         &api_configs.openai,
         &api_configs.clipdrop,
@@ -64,6 +73,8 @@ fn get_params_per_api_keys_set() -> Vec<ApiParams> {
         &api_configs.cohere,
         &api_configs.ai21,
         &api_configs.together,
+        &replit,
+        &api_configs.scenario,
         // &api_configs.replit.lock().unwrap(),
     ];
 

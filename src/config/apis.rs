@@ -6,6 +6,7 @@ use std::{collections::HashMap, sync::OnceLock};
 use crate::error::Result;
 use serde_json::Value;
 use time::OffsetDateTime;
+use tracing::{debug, info};
 
 use crate::config::config::Config;
 use crate::config::get_optional_env;
@@ -49,6 +50,7 @@ impl ApiParams {
     }
 }
 
+#[derive(Debug)]
 pub struct ApisConfig {
     pub openai: Option<ApiParams>,
     pub clipdrop: Option<ApiParams>,
@@ -61,10 +63,12 @@ pub struct ApisConfig {
     pub ai21: Option<ApiParams>,
     pub together: Option<ApiParams>,
     pub replit: Option<Mutex<ApiParams>>,
+    pub scenario: Option<ApiParams>,
 }
 
 impl ApisConfig {
     pub fn get_params(&self, route: &str) -> Option<ApiParams> {
+        let replit = self.replit.as_ref().map(|r| r.lock().unwrap().clone());
         match route {
             "openai" => self.openai.clone(),
             "clipdrop" => self.clipdrop.clone(),
@@ -76,12 +80,14 @@ impl ApisConfig {
             "cohere" => self.cohere.clone(),
             "ai21" => self.ai21.clone(),
             "together" => self.together.clone(),
-            // "replit" => self.replit.lock().unwrap().clone()),
+            "replit" => replit,
+            "scenario" => self.scenario.clone(),
             _ => None,
         }
     }
 }
 
+#[derive(Debug)]
 pub struct ApisConfigBuilder {
     openai: Option<ApiParams>,
     clipdrop: Option<ApiParams>,
@@ -94,6 +100,7 @@ pub struct ApisConfigBuilder {
     ai21: Option<ApiParams>,
     together: Option<ApiParams>,
     replit: Option<ApiParams>,
+    scenario: Option<ApiParams>,
 }
 
 impl ApisConfigBuilder {
@@ -110,6 +117,7 @@ impl ApisConfigBuilder {
             ai21: None,
             together: None,
             replit: None,
+            scenario: None,
         }
     }
 
@@ -231,7 +239,6 @@ impl ApisConfigBuilder {
     }
 
     pub fn together(mut self) -> Self {
-        let key = get_optional_env("TOGETHER_API_KEY");
         if let Some(key) = get_optional_env("TOGETHER_API_KEY") {
             self.together = Some(
                 ApiParams::new()
@@ -246,17 +253,34 @@ impl ApisConfigBuilder {
 
     pub fn replit(mut self) -> Self {
         let (replit_key, replit_timeout) = get_optional_replit_key();
-        self.replit = Some(
-            ApiParams::new()
-                .key(replit_key.unwrap().lock().unwrap().clone().into())
-                .host("production-modelfarm.replit.com")
-                .path("/replit")
-                .timeout(replit_timeout),
-        );
+        if let Some(key) = replit_key {
+            let key = key.lock().unwrap().clone().into();
+            self.replit = Some(
+                ApiParams::new()
+                    .key(key)
+                    .host("production-modelfarm.replit.com")
+                    .path("/replit")
+                    .timeout(replit_timeout),
+            );
+        }
+        self
+    }
+
+    pub fn scenario(mut self) -> Self {
+        if let Some(key) = get_optional_env("SCENARIO_API_KEY") {
+            self.scenario = Some(
+                ApiParams::new()
+                    .key(key)
+                    .host("api.cloud.scenario.gg")
+                    .path("/scenario")
+                    .timeout(None),
+            );
+        }
         self
     }
 
     pub fn build(self) -> ApisConfig {
+        info!("Building ApisConfig");
         ApisConfig {
             openai: self.openai,
             clipdrop: self.clipdrop,
@@ -269,6 +293,7 @@ impl ApisConfigBuilder {
             ai21: self.ai21,
             together: self.together,
             replit: self.replit.map(|p| Mutex::new(p)),
+            scenario: self.scenario,
         }
     }
 }
@@ -289,7 +314,8 @@ pub fn apis_config() -> &'static ApisConfig {
             .cohere()
             .ai21()
             .together()
-            // .replit()
+            .replit()
+            .scenario()
             .build();
     })
 }

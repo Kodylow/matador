@@ -9,6 +9,12 @@ use axum::http::{self, HeaderValue, Request};
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
+use base64_url::base64::{
+    alphabet,
+    engine::{self, general_purpose},
+    Engine as _,
+};
+
 // endregion: --- Modules
 
 // region:    --- Time
@@ -64,6 +70,16 @@ pub fn insert_auth_bearer_header<B>(req: &mut Request<B>, auth: &str) {
     let auth = format!("Bearer {}", auth);
     req.headers_mut()
         .insert(AUTHORIZATION, HeaderValue::from_str(auth.as_str()).unwrap());
+}
+
+pub fn insert_auth_basic_header<B>(req: &mut Request<B>, auth: &str) {
+    // base64 encode the auth string
+    let auth = format!(
+        "Basic {}",
+        general_purpose::STANDARD.encode(auth.as_bytes())
+    );
+    req.headers_mut()
+        .insert("authorization", HeaderValue::from_str(&auth).unwrap());
 }
 
 pub fn insert_auth_token_header<B>(req: &mut Request<B>, auth: &str) {

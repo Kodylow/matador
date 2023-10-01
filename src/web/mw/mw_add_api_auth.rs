@@ -2,8 +2,8 @@ use super::error::{Error, Result};
 use crate::config::apis::apis_config;
 use crate::config::config::config;
 use crate::utils::{
-    add_key_query_param, insert_auth_bearer_header, insert_auth_token_header,
-    insert_x_api_key_header, remove_host_header,
+    add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
+    insert_auth_token_header, insert_x_api_key_header, remove_host_header,
 };
 
 use axum::{
@@ -11,6 +11,7 @@ use axum::{
     middleware::Next,
     response::Response,
 };
+use base64_url::base64;
 use tracing::{debug, info};
 
 pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
@@ -42,7 +43,8 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         "cohere" => bearer_auth,
         "ai21" => bearer_auth,
         "together" => bearer_auth,
-        // "replit" => bearer_auth,
+        "replit" => bearer_auth,
+        "scenario" => basic_auth,
         _ => {
             info!("No auth found for this route");
             return Err(Error::InvalidRoute(
@@ -60,6 +62,10 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
 
 pub fn bearer_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_bearer_header(req, auth);
+}
+
+pub fn basic_auth<B>(req: &mut Request<B>, auth: &str) {
+    insert_auth_basic_header(req, auth);
 }
 
 pub fn x_api_key_auth<B>(req: &mut Request<B>, auth: &str) {
