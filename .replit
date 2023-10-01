@@ -1,4 +1,4 @@
-run = "rustup default nightly && cd matador-rs && cargo run"
+run = "rustup default nightly && cargo run"
 modules = ["python-3.10:v18-20230807-322e88b"]
 
 hidden = [".pythonlibs"]
@@ -10,5 +10,5 @@ channel = "stable-23_05"
 
 [deployment]
 deploymentTarget = "cloudrun"
-build = ["sh", "-c", "rustup default nightly && cd matador-rs && cargo build"]
-run = ["sh", "-c", "cd matador-rs && cargo run"]
+build = ["sh", "-c", "rustup default nightly && cargo build"]
+run = ["sh", "-c", "cargo run"]
