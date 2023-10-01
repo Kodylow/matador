@@ -1,20 +1,25 @@
 use macaroon::MacaroonKey;
 
 use crate::{Error, Result};
-use std::env;
-use std::str::FromStr;
-use std::sync::OnceLock;
-use std::process::Command;
-use time::OffsetDateTime;
 use serde_json::Value;
+use std::env;
+use std::process::Command;
+use std::str::FromStr;
+use std::sync::{Mutex, MutexGuard, OnceLock};
+use time::OffsetDateTime;
 
-pub fn config() -> &'static Config {
-    static INSTANCE: OnceLock<Config> = OnceLock::new();
+pub fn config() -> MutexGuard<'static, Config> {
+    static INSTANCE: OnceLock<Mutex<Config>> = OnceLock::new();
 
-    INSTANCE.get_or_init(|| {
-        Config::load_from_env()
-            .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}"))
-    })
+    INSTANCE
+        .get_or_init(|| {
+            Mutex::new(
+                Config::load_from_env()
+                    .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}")),
+            )
+        })
+        .lock()
+        .expect("Failed to lock the config")
 }
 
 #[allow(non_snake_case)]
@@ -79,18 +84,19 @@ impl Config {
         })
     }
 
-    fn get_replit_key(&mut self) -> Option<String> {
-        // Get the current UNIX timestamp using the `time` crate
-        let now = OffsetDateTime::now_utc().unix_timestamp();
-
-        // Check if the key is expired
-        if self.REPLIT_API_KEY_TIMEOUT.is_none() || self.REPLIT_API_KEY_TIMEOUT.unwrap() as i64 <= now {
-            let (new_key, new_timeout) = generate_replit_key();
-            self.REPLIT_API_KEY = new_key;
-            self.REPLIT_API_KEY_TIMEOUT = new_timeout;
+    pub fn get_replit_key(&self) -> Option<String> {
+        if self.is_replit_key_expired() {
+            regenerate_replit_key();
+            self.REPLIT_API_KEY.clone()
+        } else {
+            self.REPLIT_API_KEY.clone()
         }
-        
-        self.REPLIT_API_KEY.clone()
+    }
+
+    pub fn is_replit_key_expired(&self) -> bool {
+        self.REPLIT_API_KEY_TIMEOUT.is_none()
+            || self.REPLIT_API_KEY_TIMEOUT.unwrap() as i64
+                <= OffsetDateTime::now_utc().unix_timestamp()
     }
 }
 
@@ -117,14 +123,21 @@ fn get_env_parse_to_macaroon_key(name: &'static str) -> Result<MacaroonKey> {
 
     Ok(mac_key)
 }
-    
+
 fn get_optional_replit_key() -> (Option<String>, Option<u64>) {
     // check if in repl
     if !env::var("REPL_ID").is_ok() && !env::var("REPLIT_DEPLOYMENT").is_ok() {
         return (None, None);
     }
-        
+
     generate_replit_key()
+}
+
+pub fn regenerate_replit_key() {
+    let mut conf = config(); // This gives you a mutable reference to Config
+    let (new_key, new_timeout) = generate_replit_key();
+    conf.REPLIT_API_KEY = new_key;
+    conf.REPLIT_API_KEY_TIMEOUT = new_timeout;
 }
 
 fn generate_replit_key() -> (Option<String>, Option<u64>) {
@@ -146,12 +159,13 @@ fn generate_replit_key() -> (Option<String>, Option<u64>) {
 
     // Parse the output into a JSON Value
     let v: Value = serde_json::from_str(proc_stdout).expect("Failed to parse JSON");
-    
+
     // Extract the token and timeout from the JSON Value
     let token = v["token"].as_str().map(|s| s.to_string());
     let timeout_secs = v["timeout"].as_u64();
 
-    let timeout = timeout_secs.map(|secs| (OffsetDateTime::now_utc().unix_timestamp() + secs as i64) as u64);
+    let timeout =
+        timeout_secs.map(|secs| (OffsetDateTime::now_utc().unix_timestamp() + secs as i64) as u64);
 
     println!("Generated Key!");
 

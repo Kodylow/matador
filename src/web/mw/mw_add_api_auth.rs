@@ -1,5 +1,5 @@
 use super::error::{Error, Result};
-use crate::config::config;
+use crate::config::{config, regenerate_replit_key};
 use crate::utils::{
     add_key_query_param, insert_auth_bearer_header, insert_auth_token_header,
     insert_x_api_key_header, remove_host_header,
@@ -23,14 +23,14 @@ pub enum Auth {
 }
 
 impl Auth {
-    fn key(&self) -> &'static str {
+    fn key(&self) -> String {
         match self {
-            Auth::OpenAI => config().OPENAI_API_KEY.as_ref().unwrap(),
-            Auth::ClipDrop => config().CLIPDROP_API_KEY.as_ref().unwrap(),
-            Auth::Palm => config().PALM_API_KEY.as_ref().unwrap(),
-            Auth::Replicate => config().REPLICATE_API_KEY.as_ref().unwrap(),
-            Auth::Anthropic => config().ANTHROPIC_API_KEY.as_ref().unwrap(),
-            Auth::Replit => config().REPLIT_API_KEY.as_ref().unwrap(),
+            Auth::OpenAI => config().OPENAI_API_KEY.clone().unwrap(),
+            Auth::ClipDrop => config().CLIPDROP_API_KEY.clone().unwrap(),
+            Auth::Palm => config().PALM_API_KEY.clone().unwrap(),
+            Auth::Replicate => config().REPLICATE_API_KEY.clone().unwrap(),
+            Auth::Anthropic => config().ANTHROPIC_API_KEY.clone().unwrap(),
+            Auth::Replit => config().get_replit_key().unwrap(),
         }
     }
 
@@ -53,7 +53,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
     let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
 
     println!("first_path_segment: {}", first_path_segment);
-    let auth = match first_path_segment {
+    let mut auth = match first_path_segment {
         "openai" => Auth::OpenAI,
         "clipdrop" => Auth::ClipDrop,
         "palm" => Auth::Palm,
@@ -68,7 +68,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         }
     };
 
-    auth.auth_fn()(&mut req, auth.key());
+    auth.auth_fn()(&mut req, auth.key().clone().as_str());
 
     info!("Headers: {:?}", req.headers());
     info!("URI: {:?}", req.uri());
