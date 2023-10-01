@@ -12,58 +12,28 @@ use axum::{
 };
 use tracing::{debug, info};
 
-#[derive(Debug)]
-pub enum Auth {
-    OpenAI,
-    ClipDrop,
-    Palm,
-    Replicate,
-    Anthropic,
-    Stability,
-    Replit,
-}
-
-impl Auth {
-    fn key(&self) -> String {
-        match self {
-            Auth::OpenAI => config().OPENAI_API_KEY.clone().unwrap(),
-            Auth::ClipDrop => config().CLIPDROP_API_KEY.clone().unwrap(),
-            Auth::Palm => config().PALM_API_KEY.clone().unwrap(),
-            Auth::Replicate => config().REPLICATE_API_KEY.clone().unwrap(),
-            Auth::Anthropic => config().ANTHROPIC_API_KEY.clone().unwrap(),
-            Auth::Stability => config().STABILITY_API_KEY.clone().unwrap(),
-            Auth::Replit => config().get_replit_key().unwrap(),
-        }
-    }
-
-    fn auth_fn<B>(&self) -> fn(&mut Request<B>, &str) {
-        match self {
-            Auth::OpenAI => openai_auth,
-            Auth::ClipDrop => clipdrop_auth,
-            Auth::Palm => palm_auth,
-            Auth::Replicate => replicate_auth,
-            Auth::Anthropic => anthropic_auth,
-            Auth::Stability => stability_auth,
-            Auth::Replit => replit_auth,
-        }
-    }
-}
-
 pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
     debug!("{:<12} - mw_add_auth", "MIDDLEWARE");
     remove_host_header(&mut req);
 
+    let api_configs = crate::config::config().get_api_configs();
     let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
-
     println!("first_path_segment: {}", first_path_segment);
-    let mut auth = match first_path_segment {
-        "openai" => Auth::OpenAI,
-        "clipdrop" => Auth::ClipDrop,
-        "palm" => Auth::Palm,
-        "replicate" => Auth::Replicate,
-        "anthropic" => Auth::Anthropic,
-        "stability" => Auth::Stability,
-        "replit" => Auth::Replit,
+
+    let api_config = api_configs.get(first_path_segment).ok_or_else(|| {
+        info!("No config found for this route");
+        Error::InvalidRoute("No config found for this route".to_string())
+    })?;
+
+    let key = api_config.key.clone().unwrap();
+    let auth_fn = match first_path_segment {
+        "openai" => openai_auth,
+        "clipdrop" => clipdrop_auth,
+        "palm" => palm_auth,
+        "replicate" => replicate_auth,
+        "anthropic" => anthropic_auth,
+        "stability" => stability_auth,
+        "replit" => replit_auth,
         _ => {
             info!("No auth found for this route");
             return Err(Error::InvalidRoute(
@@ -72,30 +42,30 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         }
     };
 
-    auth.auth_fn()(&mut req, auth.key().clone().as_str());
+    auth_fn(&mut req, &key);
 
     info!("URI: {:?}", req.uri());
 
     Ok(next.run(req).await)
 }
 
-fn openai_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn openai_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_bearer_header(req, auth);
 }
 
-fn clipdrop_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn clipdrop_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_x_api_key_header(req, auth);
 }
 
-fn palm_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn palm_auth<B>(req: &mut Request<B>, auth: &str) {
     add_key_query_param(req, auth);
 }
 
-fn replicate_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn replicate_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_token_header(req, auth);
 }
 
-fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_x_api_key_header(req, auth);
     req.headers_mut().insert(
         "anthropic-version",
@@ -103,10 +73,10 @@ fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
     );
 }
 
-fn stability_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn stability_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_bearer_header(req, auth);
 }
 
-fn replit_auth<B>(req: &mut Request<B>, auth: &str) {
+pub fn replit_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_bearer_header(req, auth);
 }

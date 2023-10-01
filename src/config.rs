@@ -2,11 +2,18 @@ use macaroon::MacaroonKey;
 
 use crate::{Error, Result};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::env;
 use std::process::Command;
 use std::str::FromStr;
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use time::OffsetDateTime;
+
+pub struct ApiConfig {
+    pub key: Option<String>,
+    pub host: &'static str,
+    pub path: &'static str,
+}
 
 pub fn config() -> MutexGuard<'static, Config> {
     static INSTANCE: OnceLock<Mutex<Config>> = OnceLock::new();
@@ -84,6 +91,75 @@ impl Config {
             REPLIT_API_KEY: replit_key,
             REPLIT_API_KEY_TIMEOUT: replit_timeout,
         })
+    }
+
+    pub fn get_api_configs(&self) -> HashMap<String, ApiConfig> {
+        let mut api_configs = HashMap::new();
+
+        api_configs.insert(
+            "openai".to_string(),
+            ApiConfig {
+                key: self.OPENAI_API_KEY.clone(),
+                host: "api.openai.com",
+                path: "/openai",
+            },
+        );
+
+        api_configs.insert(
+            "clipdrop".to_string(),
+            ApiConfig {
+                key: self.CLIPDROP_API_KEY.clone(),
+                host: "clipdrop-api.co",
+                path: "/clipdrop",
+            },
+        );
+
+        api_configs.insert(
+            "palm".to_string(),
+            ApiConfig {
+                key: self.PALM_API_KEY.clone(),
+                host: "generativelanguage.googleapis.com",
+                path: "/palm",
+            },
+        );
+
+        api_configs.insert(
+            "replicate".to_string(),
+            ApiConfig {
+                key: self.REPLICATE_API_KEY.clone(),
+                host: "api.replicate.com",
+                path: "/replicate",
+            },
+        );
+
+        api_configs.insert(
+            "anthropic".to_string(),
+            ApiConfig {
+                key: self.ANTHROPIC_API_KEY.clone(),
+                host: "api.anthropic.com",
+                path: "/anthropic",
+            },
+        );
+
+        api_configs.insert(
+            "stability".to_string(),
+            ApiConfig {
+                key: self.STABILITY_API_KEY.clone(),
+                host: "api.stability.ai",
+                path: "/stability",
+            },
+        );
+
+        api_configs.insert(
+            "replit".to_string(),
+            ApiConfig {
+                key: self.REPLIT_API_KEY.clone(),
+                host: "production-modelfarm.replit.com",
+                path: "/replit",
+            },
+        );
+
+        api_configs
     }
 
     pub fn get_replit_key(&self) -> Option<String> {

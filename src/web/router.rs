@@ -1,5 +1,6 @@
 // src/router.rs
 
+use crate::config::ApiConfig;
 use crate::error::{Error, Result};
 use axum::routing::get;
 use axum::{middleware, Router};
@@ -82,9 +83,9 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
     }
 
     for route in &routes {
-        let host = reverse_proxy_service::builder_https(route.host()).unwrap();
-        let service = host.build(TrimPrefix(route.path()));
-        let subrouter = Router::new().nest_service(route.path(), service);
+        let host = reverse_proxy_service::builder_https(route.host).unwrap();
+        let service = host.build(TrimPrefix(route.path));
+        let subrouter = Router::new().nest_service(route.path, service);
 
         router = router.nest("/", subrouter);
     }
@@ -94,30 +95,14 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
     Ok(router)
 }
 
-fn get_routes_per_api_keys_set() -> Vec<Route> {
-    // Check if api keys are set in config
-    let mut routes: Vec<Route> = vec![];
+fn get_routes_per_api_keys_set() -> Vec<ApiConfig> {
+    let api_configs = crate::config::config().get_api_configs();
+    let mut routes: Vec<ApiConfig> = vec![];
 
-    if crate::config::config().OPENAI_API_KEY.is_some() {
-        routes.push(Route::OpenAI);
-    }
-    if crate::config::config().PALM_API_KEY.is_some() {
-        routes.push(Route::Palm);
-    }
-    if crate::config::config().CLIPDROP_API_KEY.is_some() {
-        routes.push(Route::ClipDrop);
-    }
-    if crate::config::config().REPLICATE_API_KEY.is_some() {
-        routes.push(Route::Replicate);
-    }
-    if crate::config::config().ANTHROPIC_API_KEY.is_some() {
-        routes.push(Route::Anthropic);
-    }
-    if crate::config::config().STABILITY_API_KEY.is_some() {
-        routes.push(Route::Stability);
-    }
-    if crate::config::config().REPLIT_API_KEY.is_some() {
-        routes.push(Route::Replit);
+    for (api_name, api_config) in api_configs {
+        if api_config.key.is_some() {
+            routes.push(api_config);
+        }
     }
 
     routes
