@@ -7,6 +7,44 @@ use lightning_invoice::Bolt11Invoice;
 use macaroon::{Format, Macaroon};
 use sha2::Digest;
 
+pub struct L402Builder {
+    amount: Option<u64>,
+    timeout: Option<u64>,
+}
+
+impl L402Builder {
+    pub fn new() -> L402Builder {
+        L402Builder {
+            amount: None,
+            timeout: None,
+        }
+    }
+
+    pub fn amount(mut self, amount: u64) -> L402Builder {
+        self.amount = Some(amount);
+        self
+    }
+
+    pub fn timeout(mut self, timeout: u64) -> L402Builder {
+        self.timeout = Some(timeout);
+        self
+    }
+
+    pub async fn build(self) -> Result<L402> {
+        let lnaddress = LightningAddress::new(dotenv::var("LNADDRESS").unwrap().as_str()).await;
+        let invoice_amount: i64 = self.amount.unwrap_or(1000) as i64;
+        let invoice: Bolt11Invoice = lnaddress.get_invoice(invoice_amount).await;
+        let payment_hash = invoice.payment_hash();
+        let timeout = self.timeout.unwrap_or(60 * 60 * 24) as i64;
+        let token = crypt::macaroon::generate_macaroon(payment_hash.to_string(), timeout);
+        Ok(L402 {
+            token,
+            invoice: Some(invoice),
+            preimage: None,
+        })
+    }
+}
+
 pub struct L402 {
     token: Macaroon,
     invoice: Option<Bolt11Invoice>,
