@@ -13,25 +13,30 @@ pub struct L402Builder {
 }
 
 impl L402Builder {
-    pub fn new() -> L402Builder {
-        L402Builder {
+    pub fn new() -> Self {
+        Self {
             amount: None,
             timeout: None,
         }
     }
 
-    pub fn amount(mut self, amount: u64) -> L402Builder {
+    pub fn amount(mut self, amount: u64) -> Self {
         self.amount = Some(amount);
         self
     }
 
-    pub fn timeout(mut self, timeout: u64) -> L402Builder {
+    pub fn timeout(mut self, timeout: u64) -> Self {
         self.timeout = Some(timeout);
         self
     }
 
     pub async fn build(self) -> Result<L402> {
-        let lnaddress = LightningAddress::new(dotenv::var("LNADDRESS").unwrap().as_str()).await;
+        let lnaddress = LightningAddress::new(
+            dotenv::var("LNADDRESS")
+                .expect("LNADDRESS not set")
+                .as_str(),
+        )
+        .await;
         let invoice_amount: i64 = self.amount.unwrap_or(1000) as i64;
         let invoice: Bolt11Invoice = lnaddress.get_invoice(invoice_amount).await;
         let payment_hash = invoice.payment_hash();
@@ -52,16 +57,11 @@ pub struct L402 {
 }
 
 impl L402 {
-    pub async fn new() -> Self {
-        let lnaddress = LightningAddress::new(dotenv::var("LNADDRESS").unwrap().as_str()).await;
-        let invoice: Bolt11Invoice = lnaddress.get_invoice(1000).await;
-        let payment_hash = invoice.payment_hash();
-        let timeout = 60 * 60 * 24;
-        let token = crypt::macaroon::generate_macaroon(payment_hash.to_string(), timeout);
-        L402 {
+    fn new(token: Macaroon, invoice: Option<Bolt11Invoice>, preimage: Option<String>) -> Self {
+        Self {
             token,
-            invoice: Some(invoice),
-            preimage: None,
+            invoice,
+            preimage,
         }
     }
 
