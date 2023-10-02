@@ -18,7 +18,8 @@ impl L402 {
         let lnaddress = LightningAddress::new(dotenv::var("LNADDRESS").unwrap().as_str()).await;
         let invoice: Bolt11Invoice = lnaddress.get_invoice(1000).await;
         let payment_hash = invoice.payment_hash();
-        let token = crypt::macaroon::generate_macaroon(payment_hash.to_string());
+        let timeout = 60 * 60 * 24;
+        let token = crypt::macaroon::generate_macaroon(payment_hash.to_string(), timeout);
         L402 {
             token,
             invoice: Some(invoice),
@@ -58,7 +59,7 @@ impl L402 {
             Ok(token) => token,
             Err(_) => return Err(Error::L402AuthHeaderInvalidFail),
         };
-        
+
         let preimage = Some(macaroon_preimage[1].to_string());
 
         Ok(L402 {
