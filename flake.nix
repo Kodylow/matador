@@ -16,8 +16,38 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         flakeboxLib = flakebox.lib.${system} { };
-      in
-      {
+
+        rustSrc = flakeboxLib.filter.filterSubdirs {
+          root = builtins.path {
+            name = "matador";
+            path = ./.;
+          };
+          dirs = [
+            "Cargo.toml"
+            "Cargo.lock"
+            ".cargo"
+            "src"
+          ];
+        };
+
+        multibuild =
+          (flakeboxLib.craneMultiBuild { }) (craneLib':
+            let
+              craneLib = (craneLib'.overrideArgs {
+                pname = "flexbox-multibuild";
+                src = rustSrc;
+              });
+            in
+            rec {
+              workspaceDeps = craneLib.buildWorkspaceDepsOnly { };
+              workspaceBuild = craneLib.buildWorkspace {
+                cargoArtifacts = workspaceDeps;
+              };
+              matador = craneLib.buildPackage { };
+            });
+       in
+       {
+        legacyPackages = multibuild;
         devShells = {
           default = flakeboxLib.mkDevShell {
             packages = [ ];
