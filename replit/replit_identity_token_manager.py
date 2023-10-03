@@ -13,7 +13,8 @@ class MissingEnvironmentVariable(Exception):
 
 
 class ReplitIdentityTokenManager:
-    def __init__(self, token_timeout: int = 3000):
+
+    def __init__(self, token_timeout: int = 300):
         """Initializes a new instance of ReplitIdentityTokenManager
 
         Args:
@@ -30,19 +31,17 @@ class ReplitIdentityTokenManager:
         Returns:
           str: The token.
         """
-        if (
-            self.last_update is None
-            or self.last_update + self.token_timeout < time.time()
-        ):
+        if (self.last_update is None
+                or self.last_update + self.token_timeout < time.time()):
             self.__update_token()
         return self.token
 
-    def get_token_timeout(self) -> int:
+    def get_token_timeout(self) -> Optional[int]:
         """Returns the timeout in seconds for the token.
-
+        
         Returns:
           int: The timeout in seconds for the token.
-        """
+          """
         return self.token_timeout
 
     def __update_token(self):
@@ -78,8 +77,7 @@ class ReplitIdentityTokenManager:
             return os.environ[var]
         else:
             raise MissingEnvironmentVariable(
-                f"Did not find the environment variable: {var}"
-            )
+                f"Did not find the environment variable: {var}")
 
     def get_interactive_token(self) -> str:
         """Generates and returns an identity token"
@@ -92,7 +90,6 @@ class ReplitIdentityTokenManager:
             marshaled_identity=self.get_env_var("REPL_IDENTITY"),
             replid=self.get_env_var("REPL_ID"),
         )
-
         signed_token = gsa.sign(audience=get_config().audience)
         return signed_token
 

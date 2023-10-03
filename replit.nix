@@ -1,9 +1,14 @@
 { pkgs }: {
   deps = [
+        pkgs.lsof
         pkgs.tree
         pkgs.just
-        pkgs.pkg-config
+        pkgs.cargo
+        pkgs.rustc
+        pkgs.rust-analyzer
+        pkgs.clippy
+        pkgs.rustfmt
         pkgs.openssl
-        pkgs.rustup
+        pkgs.pkg-config
   ];
 }

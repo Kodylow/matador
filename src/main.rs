@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     //     });
     // }
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
     info!("Server listening on {addr}");
     axum::Server::bind(&addr)
         .serve(router.into_make_service())

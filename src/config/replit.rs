@@ -1,8 +1,7 @@
 use std::{env, process::Command};
-
-use serde_json::Value;
+use serde::Deserialize;
 use time::OffsetDateTime;
-
+use tracing::info;
 use super::apis::ApiParams;
 
 #[derive(Clone, Debug)]
@@ -19,10 +18,16 @@ impl ReplitApiParams {
 
     pub fn get_key(&mut self) -> String {
         if self.params.is_expired() {
+            info!(
+                "Replit API key has expired, generating a new one and updating the config");
             let new_params = generate_replit_key();
             self.params = new_params;
+        } else {
+            info!(
+                "Replit API key is still valid...");
         }
 
+            
         self.params.key.clone()
     }
 }
@@ -30,15 +35,24 @@ impl ReplitApiParams {
 pub fn get_optional_replit() -> Option<ReplitApiParams> {
     // check if in repl
     if !env::var("REPL_ID").is_ok() && !env::var("REPLIT_DEPLOYMENT").is_ok() {
+        print!("Not in repl. Skipping replit api...");
         return None;
     }
+
+    info!("In repl, getting replit api key...");
     Some(ReplitApiParams {
         params: generate_replit_key(),
     })
 }
 
+#[derive(Deserialize)]
+pub struct ReplitTokenManagerResponse {
+    pub token: String,
+    pub timeout: i64
+}
+
 pub fn generate_replit_key() -> ApiParams {
-    println!("Replit Dynamic API Key ...");
+    info!("Replit Dynamic API Key ...");
     let repl_slug = env::var("REPL_SLUG").expect("REPL_SLUG not set");
     let script_path = format!("/home/runner/{}/replit/get_token.py", repl_slug);
 
@@ -54,20 +68,14 @@ pub fn generate_replit_key() -> ApiParams {
 
     let proc_stdout = proc_stdout.trim();
 
-    // Parse the output into a JSON Value
-    let v: Value = serde_json::from_str(proc_stdout).expect("Failed to parse JSON");
+    // Parse the output into the ReplitTokenManagerResponse struct
+    let res: ReplitTokenManagerResponse = serde_json::from_str(&proc_stdout).expect("Failed to parse JSON");
 
-    // Extract the token and timeout from the JSON Value
-    let token = v["token"].to_string();
-    let timeout_secs = v["timeout"].as_i64();
-
-    let timeout = timeout_secs.map(|secs| (OffsetDateTime::now_utc().unix_timestamp() + secs));
-
-    println!("Generated Key!");
+    info!("Generated Key!");
 
     ApiParams::new()
-        .key(token)
+        .key(res.token)
         .host("production-modelfarm.replit.com")
         .path("/replit")
-        .timeout(timeout)
+        .timeout(Some(res.timeout))
 }

@@ -50,6 +50,7 @@ impl L402Builder {
     }
 }
 
+#[derive(Debug)]
 pub struct L402 {
     token: Macaroon,
     invoice: Option<Bolt11Invoice>,
@@ -66,7 +67,6 @@ impl L402 {
     }
 
     pub fn is_valid(&self) -> Result<bool> {
-        println!("Runnning is valid");
         let preimage_hash = get_preimage_hash(self.preimage.as_ref().unwrap());
         Ok(crypt::macaroon::validate_macaroon(
             self.token.clone(),

@@ -303,7 +303,7 @@ impl ApisConfigBuilder {
             ai21: self.ai21,
             together: self.together,
             scenario: self.scenario,
-            replit: None,
+            replit: self.replit,
         }
     }
 }

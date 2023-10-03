@@ -15,7 +15,7 @@ fn _generate_macaroon(payment_hash: String, timeout: i64, key: &MacaroonKey) -> 
     let mut macaroon = Macaroon::create(Some("location".into()), &key, "id".into()).unwrap();
     let time_now = chrono::Utc::now().timestamp();
     macaroon.add_first_party_caveat(format!("payment_hash = {}", payment_hash).as_bytes().into());
-    macaroon.add_first_party_caveat(format!("time < {}", time_now + timeout).as_bytes().into());
+    // macaroon.add_first_party_caveat(format!("time < {}", time_now + timeout).as_bytes().into());
 
     macaroon
 }
@@ -34,11 +34,11 @@ fn _validate_macaroon(
         .as_bytes()
         .into(),
     );
-    verifier.satisfy_exact(
-        format!("time < {}", chrono::Utc::now().timestamp())
-            .as_bytes()
-            .into(),
-    );
+    // verifier.satisfy_exact(
+    //     format!("time < {}", chrono::Utc::now().timestamp())
+    //         .as_bytes()
+    //         .into(),
+    // );
     verifier
         .verify(&macaroon, &key, Default::default())
         .map_err(|_| Error::MacaroonCaveatFail)?;

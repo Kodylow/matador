@@ -14,7 +14,7 @@ use axum::{
 use base64_url::base64;
 use tracing::{debug, info};
 
-pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
+pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
     debug!("{:<12} - mw_add_auth", "MIDDLEWARE");
     remove_host_header(&mut req);
 
@@ -32,8 +32,6 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         let key = replit_config.get_key();
 
         bearer_auth(&mut req, &key);
-
-        info!("URI: {:?}", req.uri());
 
         return Ok(next.run(req).await);
     }

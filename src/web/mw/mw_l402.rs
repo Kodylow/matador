@@ -1,4 +1,4 @@
-use crate::lightning::L402Builder;
+use crate::lightning::{l402::L402, L402Builder};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::{
@@ -21,7 +21,7 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
 
     match header {
         Some(header) => {
-            let l402 = L402Builder::new().build().await?;
+            let l402 = L402::from_auth_header(header.to_str().unwrap())?;
             if l402.is_valid().unwrap() {
                 // If the token is valid, call the next middleware
                 Ok(next.run(req).await)

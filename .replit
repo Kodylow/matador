@@ -1,4 +1,4 @@
-run = "rustup default nightly && cargo run"
+run = "DEBUG_LOG=info cargo run"
 modules = ["python-3.10:v18-20230807-322e88b"]
 
 hidden = [".pythonlibs"]
@@ -6,9 +6,7 @@ hidden = [".pythonlibs"]
 [nix]
 channel = "stable-23_05"
 
-
-
 [deployment]
 deploymentTarget = "cloudrun"
-build = ["sh", "-c", "rustup default nightly && cargo build"]
+build = ["sh", "-c", "cargo build"]
 run = ["sh", "-c", "cargo run"]
