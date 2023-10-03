@@ -12,6 +12,8 @@ use tracing::{debug, info};
 use crate::config::config::Config;
 use crate::config::get_optional_env;
 
+use super::replit::{get_optional_replit, ReplitApiParams};
+
 #[derive(Clone, Debug)]
 pub struct ApiParams {
     pub key: String,
@@ -65,27 +67,6 @@ impl ApiParams {
     }
 }
 
-lazy_static! {
-    static ref REPLIT_CONFIG: Mutex<ApiParams> = Mutex::new(ApiParams {
-        key: "".to_string(),
-        host: "production-modelfarm.replit.com",
-        path: "/replit",
-        timeout: None,
-    });
-}
-
-pub fn get_replit_config() -> std::sync::MutexGuard<'static, ApiParams> {
-    REPLIT_CONFIG.lock().unwrap()
-}
-
-pub fn set_replit_config(new_key: String, new_timeout: i64) -> ApiParams {
-    let mut config = get_replit_config();
-    config.set_key(new_key);
-    config.timeout = Some(new_timeout);
-
-    config.clone()
-}
-
 #[derive(Debug)]
 pub struct ApisConfig {
     pub openai: Option<ApiParams>,
@@ -99,6 +80,7 @@ pub struct ApisConfig {
     pub ai21: Option<ApiParams>,
     pub together: Option<ApiParams>,
     pub scenario: Option<ApiParams>,
+    pub replit: Option<ReplitApiParams>,
 }
 
 impl ApisConfig {
@@ -133,6 +115,7 @@ pub struct ApisConfigBuilder {
     ai21: Option<ApiParams>,
     together: Option<ApiParams>,
     scenario: Option<ApiParams>,
+    replit: Option<ReplitApiParams>,
 }
 
 impl ApisConfigBuilder {
@@ -149,6 +132,7 @@ impl ApisConfigBuilder {
             ai21: None,
             together: None,
             scenario: None,
+            replit: None,
         }
     }
 
@@ -292,6 +276,15 @@ impl ApisConfigBuilder {
                     .timeout(None),
             );
         }
+
+        self
+    }
+
+    pub fn replit(mut self) -> Self {
+        if let Some(replit) = get_optional_replit() {
+            self.replit = Some(replit);
+        }
+
         self
     }
 
@@ -309,6 +302,7 @@ impl ApisConfigBuilder {
             ai21: self.ai21,
             together: self.together,
             scenario: self.scenario,
+            replit: None,
         }
     }
 }
@@ -330,54 +324,7 @@ pub fn apis_config() -> &'static ApisConfig {
             .ai21()
             .together()
             .scenario()
+            .replit()
             .build();
     })
-}
-
-fn get_optional_replit_key() -> (Option<String>, Option<i64>) {
-    // check if in repl
-    if !env::var("REPL_ID").is_ok() && !env::var("REPLIT_DEPLOYMENT").is_ok() {
-        return (None, None);
-    }
-
-    generate_replit_key()
-}
-
-// pub fn regenerate_replit_key() {
-//     let conf = apis_config();
-//     let (new_key, new_timeout) = generate_replit_key();
-//     let mut replit = conf.replit.lock().unwrap();
-//     replit.key = new_key.unwrap().lock().unwrap().clone().into();
-//     replit.timeout = new_timeout;
-// }
-
-pub fn generate_replit_key() -> (Option<String>, Option<i64>) {
-    println!("Replit Dynamic API Key ...");
-    let repl_slug = env::var("REPL_SLUG").expect("REPL_SLUG not set");
-    let script_path = format!("/home/runner/{}/replit/get_token.py", repl_slug);
-
-    let proc = Command::new("python")
-        .arg(script_path)
-        .output()
-        .expect("Failed to execute Get Replit API KEY process");
-    let proc_stdout = String::from_utf8_lossy(&proc.stdout);
-
-    if proc_stdout.is_empty() {
-        return (None, None);
-    }
-
-    let proc_stdout = proc_stdout.trim();
-
-    // Parse the output into a JSON Value
-    let v: Value = serde_json::from_str(proc_stdout).expect("Failed to parse JSON");
-
-    // Extract the token and timeout from the JSON Value
-    let token = v["token"].to_string();
-    let timeout_secs = v["timeout"].as_i64();
-
-    let timeout = timeout_secs.map(|secs| (OffsetDateTime::now_utc().unix_timestamp() + secs));
-
-    println!("Generated Key!");
-
-    (Some(token), timeout)
 }

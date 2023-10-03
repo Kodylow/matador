@@ -1,5 +1,5 @@
 use super::error::{Error, Result};
-use crate::config::apis::{apis_config, generate_replit_key, get_replit_config, set_replit_config};
+use crate::config::apis::apis_config;
 use crate::config::config::config;
 use crate::utils::{
     add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
@@ -21,14 +21,20 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
     let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
     info!("first_path_segment: {}", first_path_segment);
     if first_path_segment == "replit" {
-        let replit_config = get_replit_config().clone();
-        // check if replit key is timed out
-        if replit_config.is_expired() {
-            info!("Replit key is expired, generating new one");
-            let (key, timeout) = generate_replit_key();
-            let replit_config = set_replit_config(key.unwrap(), timeout.unwrap());
-        }
-        bearer_auth(&mut req, &replit_config.key);
+        let mut replit_config = match apis_config().replit.clone() {
+            Some(replit_config) => replit_config,
+            None => {
+                info!("No replit config found");
+                return Err(Error::InvalidRoute("No replit config found".to_string()));
+            }
+        };
+
+        let key = replit_config.get_key();
+
+        bearer_auth(&mut req, &key);
+
+        info!("URI: {:?}", req.uri());
+
         return Ok(next.run(req).await);
     }
 
@@ -54,7 +60,6 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
         "cohere" => bearer_auth,
         "ai21" => bearer_auth,
         "together" => bearer_auth,
-        "replit" => bearer_auth,
         "scenario" => basic_auth,
         _ => {
             info!("No auth found for this route");

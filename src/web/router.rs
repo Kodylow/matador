@@ -1,6 +1,6 @@
 // src/router.rs
 
-use crate::config::apis::{apis_config, get_replit_config, ApiParams, ApisConfig};
+use crate::config::apis::{apis_config, ApiParams, ApisConfig};
 use crate::error::{Error, Result};
 use axum::routing::get;
 use axum::{middleware, Router};
@@ -57,7 +57,6 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
 
 fn get_params_per_api_keys_set() -> Vec<ApiParams> {
     let api_configs = apis_config();
-    let replit_config = get_replit_config();
     let api_params = [
         &api_configs.openai,
         &api_configs.clipdrop,
@@ -70,6 +69,7 @@ fn get_params_per_api_keys_set() -> Vec<ApiParams> {
         &api_configs.ai21,
         &api_configs.together,
         &api_configs.scenario,
+        &api_configs.replit.clone().map(|replit| replit.params),
     ];
 
     api_params

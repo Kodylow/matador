@@ -1,5 +1,6 @@
 pub mod apis;
 pub mod config;
+pub mod replit;
 
 use std::{env, str::FromStr};
 
