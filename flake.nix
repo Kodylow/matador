@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
 
     flakebox = {
-      url = "github:rustshop/flakebox";
+      url = "github:rustshop/flakebox?rev=e1cb8e13203bd9c8ea35ff86cda7ceaba473940f";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

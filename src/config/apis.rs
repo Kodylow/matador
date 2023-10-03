@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use std::env;
 use std::process::Command;
 use std::sync::Mutex;
@@ -34,6 +35,10 @@ impl ApiParams {
         self
     }
 
+    pub fn set_key(&mut self, key: String) {
+        self.key = key;
+    }
+
     pub fn host(mut self, host: &'static str) -> Self {
         self.host = host;
         self
@@ -48,6 +53,37 @@ impl ApiParams {
         self.timeout = timeout;
         self
     }
+
+    pub fn is_expired(&self) -> bool {
+        match self.timeout {
+            Some(timeout) => {
+                let now = OffsetDateTime::now_utc().unix_timestamp();
+                now > timeout
+            }
+            None => false,
+        }
+    }
+}
+
+lazy_static! {
+    static ref REPLIT_CONFIG: Mutex<ApiParams> = Mutex::new(ApiParams {
+        key: "".to_string(),
+        host: "production-modelfarm.replit.com",
+        path: "/replit",
+        timeout: None,
+    });
+}
+
+pub fn get_replit_config() -> std::sync::MutexGuard<'static, ApiParams> {
+    REPLIT_CONFIG.lock().unwrap()
+}
+
+pub fn set_replit_config(new_key: String, new_timeout: i64) -> ApiParams {
+    let mut config = get_replit_config();
+    config.set_key(new_key);
+    config.timeout = Some(new_timeout);
+
+    config.clone()
 }
 
 #[derive(Debug)]
@@ -62,13 +98,11 @@ pub struct ApisConfig {
     pub cohere: Option<ApiParams>,
     pub ai21: Option<ApiParams>,
     pub together: Option<ApiParams>,
-    pub replit: Option<Mutex<ApiParams>>,
     pub scenario: Option<ApiParams>,
 }
 
 impl ApisConfig {
     pub fn get_params(&self, route: &str) -> Option<ApiParams> {
-        let replit = self.replit.as_ref().map(|r| r.lock().unwrap().clone());
         match route {
             "openai" => self.openai.clone(),
             "clipdrop" => self.clipdrop.clone(),
@@ -80,7 +114,6 @@ impl ApisConfig {
             "cohere" => self.cohere.clone(),
             "ai21" => self.ai21.clone(),
             "together" => self.together.clone(),
-            "replit" => replit,
             "scenario" => self.scenario.clone(),
             _ => None,
         }
@@ -99,7 +132,6 @@ pub struct ApisConfigBuilder {
     cohere: Option<ApiParams>,
     ai21: Option<ApiParams>,
     together: Option<ApiParams>,
-    replit: Option<ApiParams>,
     scenario: Option<ApiParams>,
 }
 
@@ -116,7 +148,6 @@ impl ApisConfigBuilder {
             cohere: None,
             ai21: None,
             together: None,
-            replit: None,
             scenario: None,
         }
     }
@@ -251,21 +282,6 @@ impl ApisConfigBuilder {
         self
     }
 
-    pub fn replit(mut self) -> Self {
-        let (replit_key, replit_timeout) = get_optional_replit_key();
-        if let Some(key) = replit_key {
-            let key = key.lock().unwrap().clone().into();
-            self.replit = Some(
-                ApiParams::new()
-                    .key(key)
-                    .host("production-modelfarm.replit.com")
-                    .path("/replit")
-                    .timeout(replit_timeout),
-            );
-        }
-        self
-    }
-
     pub fn scenario(mut self) -> Self {
         if let Some(key) = get_optional_env("SCENARIO_API_KEY") {
             self.scenario = Some(
@@ -292,7 +308,6 @@ impl ApisConfigBuilder {
             cohere: self.cohere,
             ai21: self.ai21,
             together: self.together,
-            replit: self.replit.map(|p| Mutex::new(p)),
             scenario: self.scenario,
         }
     }
@@ -314,13 +329,12 @@ pub fn apis_config() -> &'static ApisConfig {
             .cohere()
             .ai21()
             .together()
-            .replit()
             .scenario()
             .build();
     })
 }
 
-fn get_optional_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
+fn get_optional_replit_key() -> (Option<String>, Option<i64>) {
     // check if in repl
     if !env::var("REPL_ID").is_ok() && !env::var("REPLIT_DEPLOYMENT").is_ok() {
         return (None, None);
@@ -337,7 +351,7 @@ fn get_optional_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
 //     replit.timeout = new_timeout;
 // }
 
-fn generate_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
+pub fn generate_replit_key() -> (Option<String>, Option<i64>) {
     println!("Replit Dynamic API Key ...");
     let repl_slug = env::var("REPL_SLUG").expect("REPL_SLUG not set");
     let script_path = format!("/home/runner/{}/replit/get_token.py", repl_slug);
@@ -358,12 +372,12 @@ fn generate_replit_key() -> (Option<Mutex<String>>, Option<i64>) {
     let v: Value = serde_json::from_str(proc_stdout).expect("Failed to parse JSON");
 
     // Extract the token and timeout from the JSON Value
-    let token = v["token"].as_str().map(|s| Mutex::new(s.to_string()));
+    let token = v["token"].to_string();
     let timeout_secs = v["timeout"].as_i64();
 
     let timeout = timeout_secs.map(|secs| (OffsetDateTime::now_utc().unix_timestamp() + secs));
 
     println!("Generated Key!");
 
-    (token, timeout)
+    (Some(token), timeout)
 }

@@ -1,5 +1,5 @@
 use super::error::{Error, Result};
-use crate::config::apis::apis_config;
+use crate::config::apis::{apis_config, generate_replit_key, get_replit_config, set_replit_config};
 use crate::config::config::config;
 use crate::utils::{
     add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
@@ -20,11 +20,21 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
 
     let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
     info!("first_path_segment: {}", first_path_segment);
+    if first_path_segment == "replit" {
+        let replit_config = get_replit_config().clone();
+        // check if replit key is timed out
+        if replit_config.is_expired() {
+            info!("Replit key is expired, generating new one");
+            let (key, timeout) = generate_replit_key();
+            let replit_config = set_replit_config(key.unwrap(), timeout.unwrap());
+        }
+        bearer_auth(&mut req, &replit_config.key);
+        return Ok(next.run(req).await);
+    }
 
     let api_config = apis_config().get_params(first_path_segment);
-    println!("api_config: {:?}", api_config);
     let key = match api_config {
-        Some(a) => a.key.clone(),
+        Some(api_config) => api_config.key,
         None => {
             info!("No key found for this route");
             return Err(Error::InvalidRoute(
@@ -32,6 +42,7 @@ pub async fn add_auth<B>(mut req: Request<B>, next: Next<B>) -> Result<Response>
             ));
         }
     };
+
     let auth_fn = match first_path_segment {
         "openai" => bearer_auth,
         "clipdrop" => x_api_key_auth,
