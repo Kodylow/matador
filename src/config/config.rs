@@ -1,22 +1,23 @@
 use macaroon::MacaroonKey;
+use once_cell::sync::Lazy;
 
 use crate::{Error, Result};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::env;
 use std::process::Command;
 use std::str::FromStr;
-use std::{collections::HashMap, sync::OnceLock};
 use time::OffsetDateTime;
 
 use super::{get_env, get_env_b64u_as_u8s, get_env_parse, get_env_parse_to_macaroon_key};
 
-pub fn config() -> &'static Config {
-    static INSTANCE: OnceLock<Config> = OnceLock::new();
+static INSTANCE: Lazy<Config> = Lazy::new(|| {
+    Config::load_from_env()
+        .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}"))
+});
 
-    INSTANCE.get_or_init(|| {
-        Config::load_from_env()
-            .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}"))
-    })
+pub fn config() -> &'static Config {
+    &INSTANCE
 }
 
 #[allow(non_snake_case)]

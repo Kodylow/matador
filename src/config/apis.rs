@@ -1,8 +1,9 @@
 use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
+use std::collections::HashMap;
 use std::env;
 use std::process::Command;
 use std::sync::Mutex;
-use std::{collections::HashMap, sync::OnceLock};
 
 use crate::error::Result;
 use serde_json::Value;
@@ -307,24 +308,24 @@ impl ApisConfigBuilder {
     }
 }
 
-pub fn apis_config() -> &'static ApisConfig {
-    static INSTANCE: OnceLock<ApisConfig> = OnceLock::new();
+pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
+    dotenv::dotenv().ok();
+    ApisConfigBuilder::new()
+        .openai()
+        .clipdrop()
+        .palm()
+        .replicate()
+        .anthropic()
+        .stability()
+        .goose()
+        .cohere()
+        .ai21()
+        .together()
+        .scenario()
+        .replit()
+        .build()
+});
 
-    INSTANCE.get_or_init(|| {
-        dotenv::dotenv().ok();
-        return ApisConfigBuilder::new()
-            .openai()
-            .clipdrop()
-            .palm()
-            .replicate()
-            .anthropic()
-            .stability()
-            .goose()
-            .cohere()
-            .ai21()
-            .together()
-            .scenario()
-            .replit()
-            .build();
-    })
+pub fn apis_config() -> &'static ApisConfig {
+    &APIS_CONFIG
 }
