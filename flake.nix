@@ -5,8 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
 
     flakebox = {
-      url = "github:rustshop/flakebox?rev=d481879f958f56b4327ccb9b0ea8a494fb8867ed";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:rustshop/flakebox?rev=389987aadbc291d0dff842b898b643d5e6a8d140";
     };
 
     flake-utils.url = "github:numtide/flake-utils";
@@ -15,6 +14,10 @@
   outputs = { self, nixpkgs, flakebox, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        pkgs = import nixpkgs {
+          inherit system;
+        };
+
         flakeboxLib = flakebox.lib.${system} { };
 
         rustSrc = flakeboxLib.filter.filterSubdirs {
@@ -36,6 +39,13 @@
               craneLib = (craneLib'.overrideArgs {
                 pname = "flexbox-multibuild";
                 src = rustSrc;
+                buildInputs = [
+                  pkgs.openssl
+                ];
+
+                nativeBuildInputs = [
+                  pkgs.pkg-config
+                ];
               });
             in
             rec {
@@ -50,6 +60,12 @@
         legacyPackages = multibuild;
         devShells = {
           default = flakeboxLib.mkDevShell {
+            buildInputs = [
+              pkgs.openssl
+            ];
+            nativeBuildInputs = [
+              pkgs.pkg-config
+            ];
             packages = [ ];
           };
         };
