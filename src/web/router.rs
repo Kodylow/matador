@@ -69,6 +69,7 @@ fn get_params_per_api_keys_set() -> Vec<ApiParams> {
         &api_configs.ai21,
         &api_configs.together,
         &api_configs.scenario,
+        &api_configs.perplexity,
         &api_configs.replit.clone().map(|replit| replit.params),
     ];
 

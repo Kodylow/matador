@@ -80,6 +80,7 @@ pub struct ApisConfig {
     pub ai21: Option<ApiParams>,
     pub together: Option<ApiParams>,
     pub scenario: Option<ApiParams>,
+    pub perplexity: Option<ApiParams>,
     pub replit: Option<ReplitApiParams>,
 }
 
@@ -97,6 +98,7 @@ impl ApisConfig {
             "ai21" => self.ai21.clone(),
             "together" => self.together.clone(),
             "scenario" => self.scenario.clone(),
+            "perplexity" => self.perplexity.clone(),
             _ => None,
         }
     }
@@ -115,6 +117,7 @@ pub struct ApisConfigBuilder {
     ai21: Option<ApiParams>,
     together: Option<ApiParams>,
     scenario: Option<ApiParams>,
+    perplexity: Option<ApiParams>,
     replit: Option<ReplitApiParams>,
 }
 
@@ -132,6 +135,7 @@ impl ApisConfigBuilder {
             ai21: None,
             together: None,
             scenario: None,
+            perplexity: None,
             replit: None,
         }
     }
@@ -280,6 +284,20 @@ impl ApisConfigBuilder {
         self
     }
 
+    pub fn perplexity(mut self) -> Self {
+        if let Some(key) = get_optional_env("PERPLEXITY_API_KEY") {
+            self.perplexity = Some(
+                ApiParams::new()
+                    .key(key)
+                    .host("api.perplexity.ai")
+                    .path("/perplexity")
+                    .timeout(None),
+            );
+        }
+
+        self
+    }
+
     pub fn replit(mut self) -> Self {
         if let Some(replit) = get_optional_replit() {
             self.replit = Some(replit);
@@ -302,6 +320,7 @@ impl ApisConfigBuilder {
             ai21: self.ai21,
             together: self.together,
             scenario: self.scenario,
+            perplexity: self.perplexity,
             replit: self.replit,
         }
     }
@@ -321,6 +340,7 @@ pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
         .ai21()
         .together()
         .scenario()
+        .perplexity()
         .replit()
         .build()
 });
