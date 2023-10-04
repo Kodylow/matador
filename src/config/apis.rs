@@ -81,6 +81,7 @@ pub struct ApisConfig {
     pub together: Option<ApiParams>,
     pub scenario: Option<ApiParams>,
     pub perplexity: Option<ApiParams>,
+    pub anyscale: Option<ApiParams>,
     pub replit: Option<ReplitApiParams>,
 }
 
@@ -99,6 +100,7 @@ impl ApisConfig {
             "together" => self.together.clone(),
             "scenario" => self.scenario.clone(),
             "perplexity" => self.perplexity.clone(),
+            "anyscale" => self.anyscale.clone(),
             _ => None,
         }
     }
@@ -118,6 +120,7 @@ pub struct ApisConfigBuilder {
     together: Option<ApiParams>,
     scenario: Option<ApiParams>,
     perplexity: Option<ApiParams>,
+    anyscale: Option<ApiParams>,
     replit: Option<ReplitApiParams>,
 }
 
@@ -136,6 +139,7 @@ impl ApisConfigBuilder {
             together: None,
             scenario: None,
             perplexity: None,
+            anyscale: None,
             replit: None,
         }
     }
@@ -298,6 +302,20 @@ impl ApisConfigBuilder {
         self
     }
 
+    pub fn anyscale(mut self) -> Self {
+        if let Some(key) = get_optional_env("ANYSCALE_API_KEY") {
+            self.anyscale = Some(
+                ApiParams::new()
+                    .key(key)
+                    .host("api.endpoints.anyscale.com")
+                    .path("/anyscale")
+                    .timeout(None),
+            );
+        }
+
+        self
+    }
+
     pub fn replit(mut self) -> Self {
         if let Some(replit) = get_optional_replit() {
             self.replit = Some(replit);
@@ -321,6 +339,7 @@ impl ApisConfigBuilder {
             together: self.together,
             scenario: self.scenario,
             perplexity: self.perplexity,
+            anyscale: self.anyscale,
             replit: self.replit,
         }
     }
@@ -341,6 +360,7 @@ pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
         .together()
         .scenario()
         .perplexity()
+        .anyscale()
         .replit()
         .build()
 });

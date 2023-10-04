@@ -58,6 +58,7 @@ pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) ->
         "together" => bearer_auth,
         "scenario" => basic_auth,
         "perplexity" => bearer_auth,
+        "anyscale" => bearer_auth,
         _ => {
             info!("No auth found for this route");
             return Err(Error::InvalidRoute(
