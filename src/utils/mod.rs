@@ -2,18 +2,14 @@
 
 mod error;
 
-pub use self::error::{Error, Result};
-
 use axum::http::uri::PathAndQuery;
 use axum::http::{self, HeaderValue, Request};
+use base64_url::base64::engine::{self, general_purpose};
+use base64_url::base64::{alphabet, Engine as _};
 use time::format_description::well_known::Rfc3339;
 use time::{Duration, OffsetDateTime};
 
-use base64_url::base64::{
-    alphabet,
-    engine::{self, general_purpose},
-    Engine as _,
-};
+pub use self::error::{Error, Result};
 
 // endregion: --- Modules
 

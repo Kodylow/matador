@@ -11,3 +11,4 @@ preimage="$2"
 
 # Print the result
 echo -e "\n-H 'Authorization: L402 $token:$preimage'"
+

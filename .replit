@@ -10,3 +10,4 @@ channel = "stable-23_05"
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "cargo build"]
 run = ["sh", "-c", "cargo run"]
+

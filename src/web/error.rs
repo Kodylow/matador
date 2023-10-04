@@ -1,8 +1,9 @@
-use crate::{crypt, lightning, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 use tracing::debug;
+
+use crate::{crypt, lightning, model, web};
 
 #[allow(dead_code)]
 pub type Result<T> = core::result::Result<T, Error>;

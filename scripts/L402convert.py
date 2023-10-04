@@ -17,3 +17,4 @@ if __name__ == '__main__':
     token = get_token_from_header(www_authenticate_header)
     output = f"\n-H 'Authorization: L402 {token}:{preimage}'"
     print(output)
+

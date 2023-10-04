@@ -1,10 +1,11 @@
 #![allow(unused)] // For early development.
 
-use crate::model::ModelManager;
-
 use std::net::SocketAddr;
+
 use tracing::info;
 use tracing_subscriber::EnvFilter;
+
+use crate::model::ModelManager;
 
 mod config;
 mod crypt;
@@ -44,8 +45,8 @@ async fn main() -> Result<()> {
     // } else {
     //     return Err(Error::RouterError {
     //         text:
-    //             "No LNADDRESS or MACAROON_SECRET set, you have to set both to enable LND middleware"
-    //                 .to_string(),
+    //             "No LNADDRESS or MACAROON_SECRET set, you have to set both to
+    // enable LND middleware"                 .to_string(),
     //     });
     // }
 

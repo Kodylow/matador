@@ -7,7 +7,6 @@ mod store;
 pub mod balance;
 
 pub use self::error::{Error, Result};
-
 use crate::model::store::{new_db_pool, Db};
 
 // endregion: --- Modules

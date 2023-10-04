@@ -1185,7 +1185,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "matador-rs"
+name = "matador"
 version = "0.1.0"
 dependencies = [
  "anyhow",

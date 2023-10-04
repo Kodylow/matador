@@ -1,5 +1,5 @@
 [package]
-name = "matador-rs"
+name = "matador"
 version = "0.1.0"
 edition = "2021"
 
@@ -47,3 +47,4 @@ tower = "0.4.13"
 futures-util = "0.3.28"
 data-encoding = "2.4.0"
 base64-url = "2.0.0"
+

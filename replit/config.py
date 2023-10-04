@@ -28,3 +28,4 @@ def get_config() -> Config:
         Config: the global config for the Model Farm API client.
     """
     return _config
+

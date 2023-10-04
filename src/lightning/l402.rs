@@ -1,11 +1,10 @@
-use crate::crypt;
-
-use super::error::{Error, Result};
-use super::LightningAddress;
-
 use lightning_invoice::Bolt11Invoice;
 use macaroon::{Format, Macaroon};
 use sha2::Digest;
+
+use super::error::{Error, Result};
+use super::LightningAddress;
+use crate::crypt;
 
 pub struct L402Builder {
     amount: Option<u64>,

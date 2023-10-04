@@ -1,19 +1,18 @@
-use lazy_static::lazy_static;
-use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::env;
 use std::process::Command;
 use std::sync::Mutex;
 
-use crate::error::Result;
+use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde_json::Value;
 use time::OffsetDateTime;
 use tracing::{debug, info};
 
+use super::replit::{get_optional_replit, ReplitApiParams};
 use crate::config::config::Config;
 use crate::config::get_optional_env;
-
-use super::replit::{get_optional_replit, ReplitApiParams};
+use crate::error::Result;
 
 #[derive(Clone, Debug)]
 pub struct ApiParams {

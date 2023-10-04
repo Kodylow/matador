@@ -1,7 +1,10 @@
-use std::{env, process::Command};
+use std::env;
+use std::process::Command;
+
 use serde::Deserialize;
 use time::OffsetDateTime;
 use tracing::info;
+
 use super::apis::ApiParams;
 
 #[derive(Clone, Debug)]
@@ -18,16 +21,13 @@ impl ReplitApiParams {
 
     pub fn get_key(&mut self) -> String {
         if self.params.is_expired() {
-            info!(
-                "Replit API key has expired, generating a new one and updating the config");
+            info!("Replit API key has expired, generating a new one and updating the config");
             let new_params = generate_replit_key();
             self.params = new_params;
         } else {
-            info!(
-                "Replit API key is still valid...");
+            info!("Replit API key is still valid...");
         }
 
-            
         self.params.key.clone()
     }
 }
@@ -48,7 +48,7 @@ pub fn get_optional_replit() -> Option<ReplitApiParams> {
 #[derive(Deserialize)]
 pub struct ReplitTokenManagerResponse {
     pub token: String,
-    pub timeout: i64
+    pub timeout: i64,
 }
 
 pub fn generate_replit_key() -> ApiParams {
@@ -69,7 +69,8 @@ pub fn generate_replit_key() -> ApiParams {
     let proc_stdout = proc_stdout.trim();
 
     // Parse the output into the ReplitTokenManagerResponse struct
-    let res: ReplitTokenManagerResponse = serde_json::from_str(&proc_stdout).expect("Failed to parse JSON");
+    let res: ReplitTokenManagerResponse =
+        serde_json::from_str(&proc_stdout).expect("Failed to parse JSON");
 
     info!("Generated Key!");
 

@@ -1,7 +1,8 @@
-use crate::crypt;
-use crate::model::store;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
+
+use crate::crypt;
+use crate::model::store;
 
 pub type Result<T> = core::result::Result<T, Error>;
 

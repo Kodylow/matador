@@ -100,3 +100,4 @@ class ReplitIdentityTokenManager:
           bool: True if in the deployment environment, False otherwise.
         """
         return "REPLIT_DEPLOYMENT" in os.environ
+

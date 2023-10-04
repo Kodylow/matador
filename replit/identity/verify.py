@@ -341,3 +341,4 @@ def verify_identity_token(
         claims=_parse_claims(goval_cert) if goval_cert else None,
     )
     return repl_identity
+

@@ -2,11 +2,11 @@
 
 mod error;
 
-pub use self::error::{Error, Result};
-
-use crate::config::config::config;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
+
+pub use self::error::{Error, Result};
+use crate::config::config::config;
 
 // endregion: --- Modules
 

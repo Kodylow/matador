@@ -1,15 +1,15 @@
-use macaroon::MacaroonKey;
-use once_cell::sync::Lazy;
-
-use crate::{Error, Result};
-use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
 use std::process::Command;
 use std::str::FromStr;
+
+use macaroon::MacaroonKey;
+use once_cell::sync::Lazy;
+use serde_json::Value;
 use time::OffsetDateTime;
 
 use super::{get_env, get_env_b64u_as_u8s, get_env_parse, get_env_parse_to_macaroon_key};
+use crate::{Error, Result};
 
 static INSTANCE: Lazy<Config> = Lazy::new(|| {
     Config::load_from_env()

@@ -1,8 +1,9 @@
+use std::fmt::Display;
+use std::str::FromStr;
+
 use crate::config::config::config;
 use crate::crypt::{encrypt_into_b64u, EncryptContent, Error, Result};
 use crate::utils::{b64u_decode, b64u_encode, now_utc, now_utc_plus_sec_str, parse_utc};
-use std::fmt::Display;
-use std::str::FromStr;
 
 // region:    --- Token Type
 
@@ -120,10 +121,12 @@ fn _token_sign_into_b64u(ident: &str, exp: &str, salt: &str, key: &[u8]) -> Resu
 // region:    --- Tests
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use anyhow::Result;
     use std::thread;
     use std::time::Duration;
+
+    use anyhow::Result;
+
+    use super::*;
 
     #[test]
     fn test_token_display_ok() -> Result<()> {

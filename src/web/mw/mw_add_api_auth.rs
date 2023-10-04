@@ -1,3 +1,9 @@
+use axum::http::{HeaderValue, Request};
+use axum::middleware::Next;
+use axum::response::Response;
+use base64_url::base64;
+use tracing::{debug, info};
+
 use super::error::{Error, Result};
 use crate::config::apis::apis_config;
 use crate::config::config::config;
@@ -5,14 +11,6 @@ use crate::utils::{
     add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
     insert_auth_token_header, insert_x_api_key_header, remove_host_header,
 };
-
-use axum::{
-    http::{HeaderValue, Request},
-    middleware::Next,
-    response::Response,
-};
-use base64_url::base64;
-use tracing::{debug, info};
 
 pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) -> Result<Response> {
     debug!("{:<12} - mw_add_auth", "MIDDLEWARE");

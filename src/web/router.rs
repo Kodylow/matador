@@ -1,7 +1,5 @@
 // src/router.rs
 
-use crate::config::apis::{apis_config, ApiParams, ApisConfig};
-use crate::error::{Error, Result};
 use axum::routing::get;
 use axum::{middleware, Router};
 use reverse_proxy_service::TrimPrefix;
@@ -9,6 +7,8 @@ use tracing::info;
 
 use super::mw::mw_add_api_auth::add_auth;
 use super::mw::mw_l402::mw_l402;
+use crate::config::apis::{apis_config, ApiParams, ApisConfig};
+use crate::error::{Error, Result};
 
 pub fn setup_router() -> Result<Router> {
     let router = Router::new();

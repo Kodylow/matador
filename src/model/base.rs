@@ -1,10 +1,10 @@
-use crate::ctx::Ctx;
-use crate::model::ModelManager;
-use crate::model::{Error, Result};
 use serde::Serialize;
 use sqlb::HasFields;
 use sqlx::postgres::PgRow;
 use sqlx::FromRow;
+
+use crate::ctx::Ctx;
+use crate::model::{Error, ModelManager, Result};
 
 #[derive(Clone, Serialize)]
 #[allow(dead_code)]

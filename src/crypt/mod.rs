@@ -5,10 +5,10 @@ pub mod macaroon;
 pub mod pwd;
 pub mod token;
 
-pub use self::error::{Error, Result};
-
 use hmac::{Hmac, Mac};
 use sha2::Sha512;
+
+pub use self::error::{Error, Result};
 
 // endregion: --- Modules
 
@@ -39,9 +39,10 @@ pub fn encrypt_into_b64u(key: &[u8], enc_content: &EncryptContent) -> Result<Str
 // region:    --- Tests
 #[cfg(test)]
 mod tests {
-    use super::*;
     use anyhow::Result;
     use rand::RngCore;
+
+    use super::*;
 
     #[test]
     fn test_encrypt_into_b64u_ok() -> Result<()> {

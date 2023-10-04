@@ -80,3 +80,4 @@ async fn new_db_pool(db_con_url: &str) -> Result<Db, sqlx::Error> {
         .connect(db_con_url)
         .await
 }
+

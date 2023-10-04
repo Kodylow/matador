@@ -1,20 +1,18 @@
-use crate::lightning::{l402::L402, L402Builder};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::{
-    http::{HeaderValue, Request},
-    middleware::Next,
-    response::Response,
-};
+use axum::http::{HeaderValue, Request, StatusCode};
+use axum::middleware::Next;
+use axum::response::{IntoResponse, Response};
 
 use super::error::Result;
+use crate::lightning::l402::L402;
+use crate::lightning::L402Builder;
 
 const WWW_AUTHENTICATE: &str = "www-authenticate";
 
 pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
     let headers = req.headers();
 
-    // Check if the authorization header is present, handle Authorization and authorization
+    // Check if the authorization header is present, handle Authorization and
+    // authorization
     let header = headers
         .get("Authorization")
         .or(headers.get("authorization"));
@@ -38,7 +36,8 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
             }
         }
         _ => {
-            // If the authorization header is missing or does not start with "L402", return a 402 error
+            // If the authorization header is missing or does not start with "L402", return
+            // a 402 error
             let l402 = L402Builder::new().build().await?;
             let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
             res.headers_mut().insert(

@@ -1,5 +1,6 @@
 use axum::response::{IntoResponse, Response};
-use reqwest::{header::InvalidHeaderValue, StatusCode};
+use reqwest::header::InvalidHeaderValue;
+use reqwest::StatusCode;
 use serde::Serialize;
 use tracing::debug;
 

@@ -1,10 +1,10 @@
 # Matador: A Bitcoin-Powered Passthrough Server
 
-Matador lets you sell API access against an arbitrary API using your API Key in exchange for bitcoin micropayments via L402 Payment Required Codes. 
+Matador lets you sell API access against an arbitrary API using your API Key in exchange for bitcoin micropayments via L402 Payment Required Codes.
 
 I built Matador because I'm sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an L402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.
 
-Matador currently supports the following APIs. To use them, you simply change the server_root_url to the corresponding matador_url and hit it exactly as you would 
+Matador currently supports the following APIs. To use them, you simply change the server_root_url to the corresponding matador_url and hit it exactly as you would
 
 ```bash
 OpenAI: api.openai.com -> matador_url/openai
@@ -71,7 +71,9 @@ git clone https://github.com/kodylow/matador-rs
 ```
 
 ### Configuration
+
 Post-cloning, navigate to the project root and create a .env file (or on Replit set these in Secrets). This file must include your API key, the API root, your Lightning address, and a Rune secret as follows:
+
 ```dotenv
 API_KEY = YOUR_OPENAI_API_KEY
 API_ROOT = "https://api.openai.com"
@@ -79,7 +81,8 @@ LN_ADDRESS = "yourusername@getalby.com"
 RUNE_SECRET = "some-base65-secret-bytes-as-hex"
 ```
 
-To generate the rune secret you just need some random base64 bytes, you can use this command: 
+To generate the rune secret you just need some random base64 bytes, you can use this command:
+
 ```
 openssl rand -base64 32
 ```
@@ -87,11 +90,13 @@ openssl rand -base64 32
 You can change the pricing and endpoints as well, the current configuration is extremely conservative (will overcharge in bitcoin terms) and hardcodes a price of bitcoin at $28,000 until I get around to creating a bitcoin price service.
 
 # Running Matador
+
 To launch the server, execute the following command:
 
 ```bash
 cargo run
 ```
+
 Olé! Your Matador server is now live, ready to process requests and exchange API key access for Bitcoin payments.
 
 # MIT License
@@ -103,3 +108,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

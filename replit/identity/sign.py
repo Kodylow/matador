@@ -60,3 +60,4 @@ class SigningAuthority:
             base64.b64encode(encoded_identity),
             base64.b64encode(encoded_cert),
         ).decode("utf-8")
+
