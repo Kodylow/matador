@@ -19,23 +19,23 @@ pub enum Error {
     Model(model::Error),
 }
 
-// region:    --- Froms
+// region:    --- From
 impl From<model::Error> for Error {
     fn from(val: model::Error) -> Self {
         Self::Model(val)
     }
 }
-// endregion: --- Froms
+// endregion: --- From
 
 // region:    --- Axum IntoResponse
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         debug!("{:<12} - model::Error {self:?}", "INTO_RES");
 
-        // Create a placeholder Axum reponse.
+        // Create a placeholder Axum response.
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
 
-        // Insert the Error into the reponse.
+        // Insert the Error into the response.
         response.extensions_mut().insert(self);
 
         response

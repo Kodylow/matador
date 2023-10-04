@@ -13,7 +13,6 @@ class MissingEnvironmentVariable(Exception):
 
 
 class ReplitIdentityTokenManager:
-
     def __init__(self, token_timeout: int = 300):
         """Initializes a new instance of ReplitIdentityTokenManager
 
@@ -31,17 +30,19 @@ class ReplitIdentityTokenManager:
         Returns:
           str: The token.
         """
-        if (self.last_update is None
-                or self.last_update + self.token_timeout < time.time()):
+        if (
+            self.last_update is None
+            or self.last_update + self.token_timeout < time.time()
+        ):
             self.__update_token()
         return self.token
 
     def get_token_timeout(self) -> Optional[int]:
         """Returns the timeout in seconds for the token.
-        
+
         Returns:
           int: The timeout in seconds for the token.
-          """
+        """
         return self.token_timeout
 
     def __update_token(self):
@@ -77,7 +78,8 @@ class ReplitIdentityTokenManager:
             return os.environ[var]
         else:
             raise MissingEnvironmentVariable(
-                f"Did not find the environment variable: {var}")
+                f"Did not find the environment variable: {var}"
+            )
 
     def get_interactive_token(self) -> str:
         """Generates and returns an identity token"
@@ -94,10 +96,9 @@ class ReplitIdentityTokenManager:
         return signed_token
 
     def __in_deployment(self) -> bool:
-        """Determines if in deployment environement.
+        """Determines if in deployment environment.
 
         Returns:
           bool: True if in the deployment environment, False otherwise.
         """
         return "REPLIT_DEPLOYMENT" in os.environ
-

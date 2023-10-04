@@ -1,0 +1,6 @@
+rules:
+  - id: avoid-unwrap
+    pattern: $panic
+    message: "Avoid using `panic` as it may cause a panic. Consider using `match` or `if let` instead."
+    languages: [rust]
+    severity: WARNING
