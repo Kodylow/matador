@@ -106,6 +106,31 @@ impl ApisConfig {
             _ => None,
         }
     }
+
+    pub fn get_params_per_api_keys_set(&self) -> Vec<ApiParams> {
+        let api_params = [
+            &self.openai,
+            &self.clipdrop,
+            &self.palm,
+            &self.replicate,
+            &self.anthropic,
+            &self.stability,
+            &self.goose,
+            &self.cohere,
+            &self.ai21,
+            &self.together,
+            &self.scenario,
+            &self.perplexity,
+            &self.anyscale,
+            &self.replit.clone().map(|replit| replit.params),
+            &self.bing,
+        ];
+
+        api_params
+            .iter()
+            .filter_map(|api_param| api_param.as_ref().cloned())
+            .collect()
+    }
 }
 
 #[derive(Debug)]

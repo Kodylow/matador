@@ -32,7 +32,7 @@ async fn root() -> &'static str {
 }
 
 fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
-    let params = get_params_per_api_keys_set();
+    let params = apis_config().get_params_per_api_keys_set();
 
     if params.is_empty() {
         return Err(Error::RouterFailToSetRoutes(
@@ -53,30 +53,4 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
     router = router.layer(middleware::from_fn(add_auth));
 
     Ok(router)
-}
-
-fn get_params_per_api_keys_set() -> Vec<ApiParams> {
-    let api_configs = apis_config();
-    let api_params = [
-        &api_configs.openai,
-        &api_configs.clipdrop,
-        &api_configs.palm,
-        &api_configs.replicate,
-        &api_configs.anthropic,
-        &api_configs.stability,
-        &api_configs.goose,
-        &api_configs.cohere,
-        &api_configs.ai21,
-        &api_configs.together,
-        &api_configs.scenario,
-        &api_configs.perplexity,
-        &api_configs.anyscale,
-        &api_configs.replit.clone().map(|replit| replit.params),
-        &api_configs.bing,
-    ];
-
-    api_params
-        .iter()
-        .filter_map(|api_param| api_param.as_ref().cloned())
-        .collect()
 }
