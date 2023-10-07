@@ -72,6 +72,7 @@ fn get_params_per_api_keys_set() -> Vec<ApiParams> {
         &api_configs.perplexity,
         &api_configs.anyscale,
         &api_configs.replit.clone().map(|replit| replit.params),
+        &api_configs.bing,
     ];
 
     api_params

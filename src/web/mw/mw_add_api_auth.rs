@@ -1,4 +1,8 @@
-use axum::http::{HeaderValue, Request};
+use std::str::FromStr;
+use std::sync::Arc;
+use std::time::Duration;
+
+use axum::http::{HeaderName, HeaderValue, Request};
 use axum::middleware::Next;
 use axum::response::Response;
 use base64_url::base64;
@@ -59,6 +63,7 @@ pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) ->
         "scenario" => basic_auth,
         "perplexity" => bearer_auth,
         "anyscale" => bearer_auth,
+        "bing" => bing_auth,
         _ => {
             info!("No auth found for this route");
             return Err(Error::InvalidRoute(
@@ -99,5 +104,12 @@ pub fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
     req.headers_mut().insert(
         "anthropic-version",
         HeaderValue::from_str("2023-06-01").unwrap(),
+    );
+}
+
+pub fn bing_auth<B>(req: &mut Request<B>, auth: &str) {
+    req.headers_mut().insert(
+        HeaderName::from_str("Ocp-Apim-Subscription-Key").unwrap(),
+        HeaderValue::from_str(auth).unwrap(),
     );
 }

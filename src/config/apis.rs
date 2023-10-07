@@ -83,6 +83,7 @@ pub struct ApisConfig {
     pub perplexity: Option<ApiParams>,
     pub anyscale: Option<ApiParams>,
     pub replit: Option<ReplitApiParams>,
+    pub bing: Option<ApiParams>,
 }
 
 impl ApisConfig {
@@ -101,6 +102,7 @@ impl ApisConfig {
             "scenario" => self.scenario.clone(),
             "perplexity" => self.perplexity.clone(),
             "anyscale" => self.anyscale.clone(),
+            "bing" => self.bing.clone(),
             _ => None,
         }
     }
@@ -122,6 +124,7 @@ pub struct ApisConfigBuilder {
     perplexity: Option<ApiParams>,
     anyscale: Option<ApiParams>,
     replit: Option<ReplitApiParams>,
+    bing: Option<ApiParams>,
 }
 
 impl ApisConfigBuilder {
@@ -141,6 +144,7 @@ impl ApisConfigBuilder {
             perplexity: None,
             anyscale: None,
             replit: None,
+            bing: None,
         }
     }
 
@@ -324,6 +328,20 @@ impl ApisConfigBuilder {
         self
     }
 
+    pub fn bing(mut self) -> Self {
+        if let Some(key) = get_optional_env("BING_API_KEY") {
+            self.bing = Some(
+                ApiParams::new()
+                    .key(key)
+                    .host("api.bing.microsoft.com")
+                    .path("/bing")
+                    .timeout(None),
+            );
+        }
+
+        self
+    }
+
     pub fn build(self) -> ApisConfig {
         info!("Building ApisConfig");
         ApisConfig {
@@ -341,6 +359,7 @@ impl ApisConfigBuilder {
             perplexity: self.perplexity,
             anyscale: self.anyscale,
             replit: self.replit,
+            bing: self.bing,
         }
     }
 }
@@ -362,6 +381,7 @@ pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
         .perplexity()
         .anyscale()
         .replit()
+        .bing()
         .build()
 });
 
