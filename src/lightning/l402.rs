@@ -4,6 +4,7 @@ use sha2::Digest;
 
 use super::error::{Error, Result};
 use super::LightningAddress;
+use crate::config::config::config;
 use crate::crypt;
 
 pub struct L402Builder {
@@ -30,12 +31,8 @@ impl L402Builder {
     }
 
     pub async fn build(self) -> Result<L402> {
-        let lnaddress = LightningAddress::new(
-            dotenv::var("LNADDRESS")
-                .expect("LNADDRESS not set")
-                .as_str(),
-        )
-        .await;
+        println!("L402Builder::build");
+        let lnaddress = LightningAddress::new(&config().LIGHTNING_ADDRESS).await;
         let invoice_amount: i64 = self.amount.unwrap_or(1000) as i64;
         let invoice: Bolt11Invoice = lnaddress.get_invoice(invoice_amount).await;
         let payment_hash = invoice.payment_hash();

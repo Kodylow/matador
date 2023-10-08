@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use macaroon::MacaroonKey;
 use once_cell::sync::Lazy;
+use reqwest::Url;
 use serde_json::Value;
 use time::OffsetDateTime;
 
@@ -36,6 +37,7 @@ pub struct Config {
 
     // -- Lightning
     pub LIGHTNING_ADDRESS: String,
+    pub CASHU_MINT_URL: Url,
 }
 
 impl Config {
@@ -56,6 +58,7 @@ impl Config {
 
             // -- Lightning
             LIGHTNING_ADDRESS: get_env("SERVICE_LIGHTNING_ADDRESS")?,
+            CASHU_MINT_URL: get_env_parse("SERVICE_CASHU_MINT_URL")?,
         })
     }
 }

@@ -1,4 +1,4 @@
-use axum::http::{HeaderValue, Request, StatusCode};
+use axum::http::{HeaderName, HeaderValue, Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use moksha_core::model::{Proofs, TokenV3};
@@ -6,8 +6,9 @@ use moksha_core::*;
 use serde::{Deserialize, Serialize};
 
 use super::error::Result;
+use crate::config::config::config;
 use crate::lightning::l402::L402;
-use crate::lightning::{L402Builder, LightningAddress};
+use crate::lightning::{Cashu402Builder, L402Builder, LightningAddress};
 
 const WWW_AUTHENTICATE: &str = "www-authenticate";
 
@@ -22,12 +23,17 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
             return Ok(next.run(req).await);
         } else {
             let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
-            let l402 = L402Builder::new().build().await?;
+            let l402 = L402Builder::new().amount(3000).build().await?;
             res.headers_mut().insert(
                 WWW_AUTHENTICATE,
                 HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
             );
 
+            let cashu402 = Cashu402Builder::new().amount(3).build().await?;
+            res.headers_mut().insert(
+                "x-cashu-authenticate",
+                HeaderValue::from_str(&cashu402.to_authenticate_string()).unwrap(),
+            );
             return Ok(res);
         }
     }
@@ -73,11 +79,14 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
 async fn handle_cashu(header: &HeaderValue) -> bool {
     let header = header.to_str().unwrap().to_string();
     let tokens = TokenV3::deserialize(header).unwrap();
-    if tokens.total_amount() < 1 {
+    let mint_url = tokens.tokens.get(0).unwrap().clone().mint.unwrap();
+    println!("mint_url: {}", mint_url);
+    println!("cashu_mint_url: {}", config().CASHU_MINT_URL);
+    if mint_url != config().CASHU_MINT_URL {
+        println!("mint_url != config().CASHU_MINT_URL");
         return false;
     }
-    let mint_url = tokens.tokens.get(0).unwrap().clone().mint.unwrap();
-    let mint_url = mint_url.join("melt").unwrap();
+    let mint_url = format!("{}/melt", mint_url.to_string());
     let lnaddress = LightningAddress::new(
         dotenv::var("LNADDRESS")
             .expect("LNADDRESS not set")
@@ -89,7 +98,6 @@ async fn handle_cashu(header: &HeaderValue) -> bool {
         .await
         .into_signed_raw()
         .to_string();
-    println!("pr: {}", pr);
     let proofs = tokens.proofs();
     let body = serde_json::to_string(&PostMeltRequest { pr, proofs }).unwrap();
 
@@ -100,6 +108,8 @@ async fn handle_cashu(header: &HeaderValue) -> bool {
         .body(body);
 
     let res = req.send().await.unwrap();
+
+    // println!("res: {:?}", res.text().await.unwrap());
 
     if res.status().is_success() {
         return true;

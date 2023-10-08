@@ -20,7 +20,8 @@ pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) ->
     debug!("{:<12} - mw_add_auth", "MIDDLEWARE");
     remove_host_header(&mut req);
 
-    let first_path_segment = req.uri().path().split('/').nth(1).unwrap_or_default();
+    let first_path_segment = req.uri().path().split('/').nth(2).unwrap_or_default();
+
     info!("first_path_segment: {}", first_path_segment);
     if first_path_segment == "replit" {
         let mut replit_config = match apis_config().replit.clone() {

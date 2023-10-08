@@ -9,21 +9,29 @@ use super::mw::mw_add_api_auth::add_auth;
 use super::mw::mw_l402::mw_l402;
 use crate::config::apis::{apis_config, ApiParams, ApisConfig};
 use crate::error::{Error, Result};
+use crate::web::routes_static;
+use http::{HeaderValue, Method};
+use tower_http::cors::{Any, CorsLayer};
 
 pub fn setup_router() -> Result<Router> {
-    let router = Router::new();
+    let cors = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
+
+    let mut router = Router::new();
     let router = set_api_proxy_routes(router)?;
     let router = set_l402_wrapper(router)?;
+    let router = router
+        .layer(cors)
+        .fallback_service(routes_static::serve_dir());
 
     Ok(router)
 }
 
 fn set_l402_wrapper(mut router: Router) -> Result<Router> {
-    router = router
-        .route("/", get(root))
-        .layer(middleware::from_fn(mw_l402));
-
-    info!("Setting l402 wrapper");
+    router = router.layer(middleware::from_fn(mw_l402));
     Ok(router)
 }
 
