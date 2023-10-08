@@ -1,7 +1,9 @@
 use axum::http::{HeaderValue, Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
+use moksha_core::model::{Proofs, TokenV3};
 use moksha_core::*;
+use serde::{Deserialize, Serialize};
 
 use super::error::Result;
 use crate::lightning::l402::L402;
@@ -16,7 +18,7 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
     let header = headers.get("X-Cashu").or(headers.get("x-cashu"));
 
     if header.is_some() {
-        if handle_cashu(header.unwrap()) {
+        if handle_cashu(header.unwrap()).await {
             return Ok(next.run(req).await);
         } else {
             let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
@@ -71,23 +73,43 @@ pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
 async fn handle_cashu(header: &HeaderValue) -> bool {
     let header = header.to_str().unwrap().to_string();
     let tokens = TokenV3::deserialize(header).unwrap();
+    if tokens.total_amount() < 1 {
+        return false;
+    }
+    let mint_url = tokens.tokens.get(0).unwrap().clone().mint.unwrap();
+    let mint_url = mint_url.join("melt").unwrap();
     let lnaddress = LightningAddress::new(
         dotenv::var("LNADDRESS")
             .expect("LNADDRESS not set")
             .as_str(),
-    );
-    if tokens.total_amount() < 1 {
-        return false;
-    }
-    for token in tokens {
-        let melt_url = format!("{}/melt", token.mint_url());
-        let invoice = lnaddress.get_invoice(token.total_amount()).await;
-        let pr = invoice.
-    }
+    )
+    .await;
+    let pr = lnaddress
+        .get_invoice(((tokens.total_amount() - 2) * 1000).try_into().unwrap())
+        .await
+        .into_signed_raw()
+        .to_string();
+    println!("pr: {}", pr);
+    let proofs = tokens.proofs();
+    let body = serde_json::to_string(&PostMeltRequest { pr, proofs }).unwrap();
 
-    if header == "cashu" {
+    let client = reqwest::Client::new();
+    let req = client
+        .post(mint_url)
+        .header("Content-Type", "application/json")
+        .body(body);
+
+    let res = req.send().await.unwrap();
+
+    if res.status().is_success() {
         return true;
     }
 
     false
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PostMeltRequest {
+    pub proofs: Proofs,
+    pub pr: String,
 }
