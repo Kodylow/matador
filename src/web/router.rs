@@ -6,7 +6,7 @@ use reverse_proxy_service::TrimPrefix;
 use tracing::info;
 
 use super::mw::mw_add_api_auth::add_auth;
-use super::mw::mw_l402::mw_l402;
+use super::mw::mw_l402::mw_402;
 use crate::config::apis::{apis_config, ApiParams, ApisConfig};
 use crate::error::{Error, Result};
 use crate::web::routes_static;
@@ -15,10 +15,10 @@ use tower_http::cors::{Any, CorsLayer};
 
 pub fn setup_router() -> Result<Router> {
     let cors = CorsLayer::new()
-        .allow_methods(vec![Method::GET, Method::POST])
+        .allow_methods(Any)
         .allow_origin(Any)
-        .allow_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-        .allow_credentials(true);
+        .allow_headers(Any)
+        .expose_headers(Any);
 
     let mut router = Router::new();
     let router = set_api_proxy_routes(router)?;
@@ -31,7 +31,7 @@ pub fn setup_router() -> Result<Router> {
 }
 
 fn set_l402_wrapper(mut router: Router) -> Result<Router> {
-    router = router.layer(middleware::from_fn(mw_l402));
+    router = router.layer(middleware::from_fn(mw_402));
     Ok(router)
 }
 

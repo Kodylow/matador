@@ -11,69 +11,71 @@ use crate::lightning::l402::L402;
 use crate::lightning::{Cashu402Builder, L402Builder, LightningAddress};
 
 const WWW_AUTHENTICATE: &str = "www-authenticate";
+const X_CASHU: &str = "x-cashu";
 
-pub async fn mw_l402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
-    let headers = req.headers();
+pub async fn mw_402<B>(req: Request<B>, next: Next<B>) -> Result<Response> {
+    let headers = req.headers().clone();
 
-    // Check if the x-cashu header is present
-    let header = headers.get("X-Cashu").or(headers.get("x-cashu"));
-
-    if header.is_some() {
-        if handle_cashu(header.unwrap()).await {
-            return Ok(next.run(req).await);
-        } else {
-            let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
-            let l402 = L402Builder::new().amount(3000).build().await?;
-            res.headers_mut().insert(
-                WWW_AUTHENTICATE,
-                HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
-            );
-
-            let cashu402 = Cashu402Builder::new().amount(3).build().await?;
-            res.headers_mut().insert(
-                "x-cashu-authenticate",
-                HeaderValue::from_str(&cashu402.to_authenticate_string()).unwrap(),
-            );
-            return Ok(res);
-        }
+    // X-Cashu handling
+    let cashu_header = headers.get("X-Cashu").or(headers.get("x-cashu"));
+    if let Some(header) = cashu_header {
+        return handle_cashu_header(header, req, next).await;
     }
 
-    // Check if the authorization header is present, handle Authorization and
-    // authorization
-    let header = headers
+    // L402 handling
+    let auth_header = headers
         .get("Authorization")
         .or(headers.get("authorization"));
-
-    match header {
-        Some(header) => {
-            let l402 = L402::from_auth_header(header.to_str().unwrap())?;
-            if l402.is_valid().unwrap() {
-                // If the token is valid, call the next middleware
-                Ok(next.run(req).await)
-            } else {
-                // If the token is invalid, return a 402 error
-                let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
-                let l402 = L402Builder::new().build().await?;
-                res.headers_mut().insert(
-                    WWW_AUTHENTICATE,
-                    HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
-                );
-
-                Ok(res)
-            }
-        }
-        _ => {
-            // If the authorization header is missing or does not start with "L402", return
-            // a 402 error
-            let l402 = L402Builder::new().build().await?;
-            let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
-            res.headers_mut().insert(
-                WWW_AUTHENTICATE,
-                HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
-            );
-            Ok(res)
-        }
+    if let Some(header) = auth_header {
+        return handle_auth_header(header, req, next).await;
     }
+
+    // If the authorization header is missing or does not start with "L402", return
+    // a 402 error
+    handle_missing_auth_header(req).await
+}
+
+async fn handle_cashu_header<B>(
+    header: &HeaderValue,
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<Response> {
+    match handle_cashu(header).await {
+        true => Ok(next.run(req).await),
+        false => generate_payment_required_response().await,
+    }
+}
+
+async fn handle_auth_header<B>(
+    header: &HeaderValue,
+    req: Request<B>,
+    next: Next<B>,
+) -> Result<Response> {
+    let l402 = L402::from_auth_header(header.to_str().unwrap())?;
+    match l402.is_valid().unwrap() {
+        true => Ok(next.run(req).await),
+        false => generate_payment_required_response().await,
+    }
+}
+
+async fn handle_missing_auth_header<B>(req: Request<B>) -> Result<Response> {
+    generate_payment_required_response().await
+}
+
+async fn generate_payment_required_response() -> Result<Response> {
+    let mut res = StatusCode::PAYMENT_REQUIRED.into_response();
+    let l402 = L402Builder::new().build().await?;
+    res.headers_mut().insert(
+        WWW_AUTHENTICATE,
+        HeaderValue::from_str(&l402.to_authenticate_string()).unwrap(),
+    );
+
+    let cashu402 = Cashu402Builder::new().amount(3).build().await?;
+    res.headers_mut().insert(
+        "x-cashu",
+        HeaderValue::from_str(&cashu402.to_authenticate_string()).unwrap(),
+    );
+    Ok(res)
 }
 
 async fn handle_cashu(header: &HeaderValue) -> bool {
@@ -83,7 +85,6 @@ async fn handle_cashu(header: &HeaderValue) -> bool {
     println!("mint_url: {}", mint_url);
     println!("cashu_mint_url: {}", config().CASHU_MINT_URL);
     if mint_url != config().CASHU_MINT_URL {
-        println!("mint_url != config().CASHU_MINT_URL");
         return false;
     }
     let mint_url = format!("{}/melt", mint_url.to_string());

@@ -6,40 +6,55 @@
   <body>
     <button id="apiButton">Get Answer</button>
     <div id="responseDiv"></div>
-
+    <input type="text" id="ecashInput" placeholder="Enter eCash string here" />
     <script>
       document
         .getElementById("apiButton")
         .addEventListener("click", function () {
-          fetch(
-            "https://matador-replit.kody.repl.co/perplexity/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "mistral-7b-instruct",
-                messages: [
-                  {
-                    role: "system",
-                    content: "Be precise and concise.",
-                  },
-                  {
-                    role: "user",
-                    content: "How many stars are there in our galaxy?",
-                  },
-                ],
-              }),
-            }
-          )
-            .then((response) => response.json())
+          var ecash = document.getElementById("ecashInput").value;
+          var headers = {
+            "Content-Type": "application/json",
+          };
+          while (ecash.length % 4 !== 0) {
+            ecash += "=";
+          }
+          if (ecash) {
+            headers["X-Cashu"] = ecash;
+          }
+          fetch("http://localhost:8000/perplexity/chat/completions", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+              model: "mistral-7b-instruct",
+              messages: [
+                {
+                  role: "system",
+                  content: "Be precise and concise.",
+                },
+                {
+                  role: "user",
+                  content: "How many stars are there in our galaxy?",
+                },
+              ],
+            }),
+          })
+            .then((response) => {
+              if (response.status === 402) {
+                let headers402 = {
+                  L402: response.headers.get("Www-Authenticate"),
+                  Cashu402: response.headers.get("X-Cashu"),
+                };
+                document.getElementById("responseDiv").innerText =
+                  JSON.stringify(headers402, null, 4);
+              } else {
+                return response.json();
+              }
+            })
             .then((data) => {
-              document.getElementById("responseDiv").innerText = JSON.stringify(
-                data,
-                null,
-                2
-              );
+              if (data) {
+                document.getElementById("responseDiv").innerText =
+                  JSON.stringify(data, null, 2);
+              }
             });
         });
     </script>
