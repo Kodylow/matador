@@ -10,15 +10,15 @@ use super::mw::mw_l402::mw_l402;
 use crate::config::apis::{apis_config, ApiParams, ApisConfig};
 use crate::error::{Error, Result};
 use crate::web::routes_static;
-use http::{HeaderValue, Method};
+use http::{header, HeaderValue, Method};
 use tower_http::cors::{Any, CorsLayer};
 
 pub fn setup_router() -> Result<Router> {
     let cors = CorsLayer::new()
-        // allow `GET` and `POST` when accessing the resource
-        .allow_methods([Method::GET, Method::POST])
-        // allow requests from any origin
-        .allow_origin(Any);
+        .allow_methods(vec![Method::GET, Method::POST])
+        .allow_origin(Any)
+        .allow_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+        .allow_credentials(true);
 
     let mut router = Router::new();
     let router = set_api_proxy_routes(router)?;

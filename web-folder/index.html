@@ -11,28 +11,28 @@
       document
         .getElementById("apiButton")
         .addEventListener("click", function () {
-          fetch("http://localhost:8000/perplexity/chat/completions", {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              Authorization:
-                "Bearer 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",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "mistral-7b-instruct",
-              messages: [
-                {
-                  role: "system",
-                  content: "Be precise and concise.",
-                },
-                {
-                  role: "user",
-                  content: "How many stars are there in our galaxy?",
-                },
-              ],
-            }),
-          })
+          fetch(
+            "https://matador-replit.kody.repl.co/perplexity/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "mistral-7b-instruct",
+                messages: [
+                  {
+                    role: "system",
+                    content: "Be precise and concise.",
+                  },
+                  {
+                    role: "user",
+                    content: "How many stars are there in our galaxy?",
+                  },
+                ],
+              }),
+            }
+          )
             .then((response) => response.json())
             .then((data) => {
               document.getElementById("responseDiv").innerText = JSON.stringify(
