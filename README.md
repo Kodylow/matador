@@ -1,8 +1,8 @@
-# Matador: A Bitcoin-Powered Passthrough Server
+# Matador: A Bitcoin-Powered Passthrough Service
 
-Matador lets you sell API access against an arbitrary API using your API Key in exchange for bitcoin micropayments via L402 Payment Required Codes.
+Matador lets you sell API access against an arbitrary API using your API Key in exchange for Bitcoin micropayments. 
 
-I built Matador because I'm sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an L402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.
+I built Matador because I'm sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an 402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.
 
 Matador currently supports the following APIs. To use them, you simply change the server_root_url to the corresponding matador_url and hit it exactly as you would
 
@@ -33,13 +33,17 @@ curl -k -v http://localhost:8080/openai/v1/chat/completions \
 This will return an L402 token and invoice, the invoice is quoted for the previous request's parameters (method, path, body).
 
 ```bash
-Www-Authenticate: L402 token=48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE, invoice=lnbc80n1pj2udc5pp5sx2u7xdad49zre579j52929z9hmk0wjlxapw665knxfyt7az9acshp56kymqtxr5es99pd82vjjnmssr2l72l379pv87d05c5pd4s2n0ysqcqzzsxqyz5vqsp50per6u35xrl3uh0ak7q0qql3mvr0ep2kr04p7d4mkgjdfnv9cw6q9qyyssqp7pvnssphg9dgh35l35jlwtpcy7lvleuqjv4u7jmczu4umnc9mukcxdq9p0n3eg4a2ezfqlux7kc47qkdp9q30cvdrkcgunr4pcnlusqh8m5e0
+Www-Authenticate: L402 "token=48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE, invoice=lnbc80n1pj2udc5pp5sx2u7xdad49zre579j52929z9hmk0wjlxapw665knxfyt7az9acshp56kymqtxr5es99pd82vjjnmssr2l72l379pv87d05c5pd4s2n0ysqcqzzsxqyz5vqsp50per6u35xrl3uh0ak7q0qql3mvr0ep2kr04p7d4mkgjdfnv9cw6q9qyyssqp7pvnssphg9dgh35l35jlwtpcy7lvleuqjv4u7jmczu4umnc9mukcxdq9p0n3eg4a2ezfqlux7kc47qkdp9q30cvdrkcgunr4pcnlusqh8m5e0
 ```
 
-Pay the lightning invoice to get the preimage and add retry the same request with the L402 authorization header:
+Pay the lightning invoice to get the preimage and retry the same request with the L402 authorization header:
 
 ```bash
-curl -k -v http://localhost:8080/openai/v1/chat/completions   -H "Content-Type: application/json" -H "Authorization: L402 48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE:7660c22f7e59fba0bfce676f666bc0bb81286e8594028c7d4f8715b7d8e48297"  -d '{                            "model": "gpt-3.5-turbo",
+curl -k -v http://localhost:8080/openai/v1/chat/completions   \
+-H "Content-Type: application/json" \
+-H "Authorization: L402 48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE:7660c22f7e59fba0bfce676f666bc0bb81286e8594028c7d4f8715b7d8e48297"  \
+-d '{                            
+    "model": "gpt-3.5-turbo",
     "messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Hello!"}]
   }'
 ```
