@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use std::env;
 use std::process::Command;
+use std::str::FromStr;
 use std::sync::Mutex;
 
+use http::{HeaderName, HeaderValue, Request};
 use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
 use serde_json::Value;
@@ -13,6 +15,10 @@ use super::replit::{get_optional_replit, ReplitApiParams};
 use crate::config::config::Config;
 use crate::config::get_optional_env;
 use crate::error::Result;
+use crate::utils::{
+    add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
+    insert_auth_token_header, insert_x_api_key_header,
+};
 
 #[derive(Clone, Debug)]
 pub struct ApiParams {
@@ -131,6 +137,31 @@ impl ApisConfig {
             .filter_map(|api_param| api_param.as_ref().cloned())
             .collect()
     }
+}
+
+pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
+    dotenv::dotenv().ok();
+    ApisConfigBuilder::new()
+        .openai()
+        .clipdrop()
+        .palm()
+        .replicate()
+        .anthropic()
+        .stability()
+        .goose()
+        .cohere()
+        .ai21()
+        .together()
+        .scenario()
+        .perplexity()
+        .anyscale()
+        .replit()
+        .bing()
+        .build()
+});
+
+pub fn apis_config() -> &'static ApisConfig {
+    &APIS_CONFIG
 }
 
 #[derive(Debug)]
@@ -387,29 +418,4 @@ impl ApisConfigBuilder {
             bing: self.bing,
         }
     }
-}
-
-pub static APIS_CONFIG: Lazy<ApisConfig> = Lazy::new(|| {
-    dotenv::dotenv().ok();
-    ApisConfigBuilder::new()
-        .openai()
-        .clipdrop()
-        .palm()
-        .replicate()
-        .anthropic()
-        .stability()
-        .goose()
-        .cohere()
-        .ai21()
-        .together()
-        .scenario()
-        .perplexity()
-        .anyscale()
-        .replit()
-        .bing()
-        .build()
-});
-
-pub fn apis_config() -> &'static ApisConfig {
-    &APIS_CONFIG
 }

@@ -1,8 +1,64 @@
-<h1 id="matador-a-bitcoin-powered-passthrough-service">Matador: A Bitcoin-Powered Passthrough Service</h1>
-<p>Matador lets you sell API access against an arbitrary API using your API Key in exchange for Bitcoin micropayments. </p>
-<p>I built Matador because I&#39;m sick of waiting for companies to wrap their APIs with Bitcoin payments, so this lets anyone with an API Key act as an 402 passthrough to the actual API, letting anyone pay for using your API Key with bitcoin.</p>
-<p>Matador currently supports the following APIs. To use them, you simply change the server_root_url to the corresponding matador_url and hit it exactly as you would</p>
-<pre><code class="lang-bash">OpenAI: api<span class="hljs-selector-class">.openai</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/openai
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Matador: A Bitcoin-Powered Passthrough Service</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+      }
+      .container {
+        width: 80%; /* Adjust as needed */
+        margin: auto; /* Centers the container */
+        padding: 20px; /* Adjust as needed */
+        background-color: #fff; /* Adjust as needed */
+        border-radius: 5px; /* Adjust as needed */
+        word-wrap: break-word;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #333;
+        text-align: center;
+      }
+      p {
+        color: #666;
+      }
+      pre,
+      code {
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: monospace;
+        line-height: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="matador-a-bitcoin-powered-passthrough-service">
+        Matador: A Bitcoin-Powered Passthrough Service
+      </h1>
+      <p>
+        Matador lets you sell API access against an arbitrary API using your API
+        Key in exchange for Bitcoin micropayments.
+      </p>
+      <p>
+        I built Matador because I&#39;m sick of waiting for companies to wrap
+        their APIs with Bitcoin payments, so this lets anyone with an API Key
+        act as an 402 passthrough to the actual API, letting anyone pay for
+        using your API Key with bitcoin.
+      </p>
+      <p>
+        Matador currently supports the following APIs. To use them, you simply
+        change the server_root_url to the corresponding matador_url and hit it
+        exactly as you would
+      </p>
+      <pre><code class="lang-bash">OpenAI: api<span class="hljs-selector-class">.openai</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/openai
 ClipDrop: cipdrop-api<span class="hljs-selector-class">.co</span> -&gt; matador_url/clipdrop
 Palm: generativelanguage<span class="hljs-selector-class">.googleapis</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/palm
 Replicate: api<span class="hljs-selector-class">.replicate</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/replicate
@@ -13,19 +69,29 @@ Cohere: api<span class="hljs-selector-class">.cohere</span><span class="hljs-sel
 AI21: api<span class="hljs-selector-class">.ai21</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/ai21
 Replit Modelfarm: production-modelfarm<span class="hljs-selector-class">.replit</span><span class="hljs-selector-class">.com</span> -&gt; matador_url/replit
 </code></pre>
-<p>You can try it out by hitting exactly like you would hit against <code>https://api.openai.com</code> but without the OpenAI Authentication Header:</p>
-<pre><code class="lang-bash">curl -k -v http:<span class="hljs-comment">//localhost:8080/openai/v1/chat/completions \</span>
+      <p>
+        You can try it out by hitting exactly like you would hit against
+        <code><a href="https://api.openai.com">https://api.openai.com</a></code>
+        but without the OpenAI Authentication Header:
+      </p>
+      <pre><code class="lang-bash">curl -k -v http:<span class="hljs-comment">//localhost:8080/openai/v1/chat/completions \</span>
   -H <span class="hljs-string">"Content-Type: application/json"</span> \
   -d <span class="hljs-string">'{
     "</span>model<span class="hljs-string">": "</span>gpt<span class="hljs-number">-3.5</span>-turbo<span class="hljs-string">",
     "</span>messages<span class="hljs-string">": [{"</span>role<span class="hljs-string">": "</span><span class="hljs-built_in">system</span><span class="hljs-string">", "</span>content<span class="hljs-string">": "</span>You are a helpful assistant.<span class="hljs-string">"}, {"</span>role<span class="hljs-string">": "</span>user<span class="hljs-string">", "</span>content<span class="hljs-string">": "</span>Hello!<span class="hljs-string">"}]
   }'</span>
 </code></pre>
-<p>This will return an L402 token and invoice, the invoice is quoted for the previous request&#39;s parameters (method, path, body).</p>
-<pre><code class="lang-bash">Www-Authenticate: L402 <span class="hljs-string">"token=48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE, invoice=lnbc80n1pj2udc5pp5sx2u7xdad49zre579j52929z9hmk0wjlxapw665knxfyt7az9acshp56kymqtxr5es99pd82vjjnmssr2l72l379pv87d05c5pd4s2n0ysqcqzzsxqyz5vqsp50per6u35xrl3uh0ak7q0qql3mvr0ep2kr04p7d4mkgjdfnv9cw6q9qyyssqp7pvnssphg9dgh35l35jlwtpcy7lvleuqjv4u7jmczu4umnc9mukcxdq9p0n3eg4a2ezfqlux7kc47qkdp9q30cvdrkcgunr4pcnlusqh8m5e0</span>
+      <p>
+        This will return an L402 token and invoice, the invoice is quoted for
+        the previous request&#39;s parameters (method, path, body).
+      </p>
+      <pre><code class="lang-bash">Www-Authenticate: L402 <span class="hljs-string">"token=48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE, invoice=lnbc80n1pj2udc5pp5sx2u7xdad49zre579j52929z9hmk0wjlxapw665knxfyt7az9acshp56kymqtxr5es99pd82vjjnmssr2l72l379pv87d05c5pd4s2n0ysqcqzzsxqyz5vqsp50per6u35xrl3uh0ak7q0qql3mvr0ep2kr04p7d4mkgjdfnv9cw6q9qyyssqp7pvnssphg9dgh35l35jlwtpcy7lvleuqjv4u7jmczu4umnc9mukcxdq9p0n3eg4a2ezfqlux7kc47qkdp9q30cvdrkcgunr4pcnlusqh8m5e0</span>
 </code></pre>
-<p>Pay the lightning invoice to get the preimage and retry the same request with the L402 authorization header:</p>
-<pre><code class="lang-bash">curl -k -v http:<span class="hljs-comment">//localhost:8080/openai/v1/chat/completions   \</span>
+      <p>
+        Pay the lightning invoice to get the preimage and retry the same request
+        with the L402 authorization header:
+      </p>
+      <pre><code class="lang-bash">curl -k -v http:<span class="hljs-comment">//localhost:8080/openai/v1/chat/completions   \</span>
 -H <span class="hljs-string">"Content-Type: application/json"</span> \
 -H <span class="hljs-string">"Authorization: L402 48IUkiWUzeeHsmV-fIhHBdRoeMDVEfc5WLFhYRRE_zJwYXltZW50SGFzaD04MTk1Y2YxOWJkNmQ0YTIxZTY5ZTJjYThhMmE4YTIyZGY3NjdiYTVmMzc0MmVkNmE5Njk5OTI0NWZiYTIyZjcxJnJlcXVlc3RIYXNoPWFlN2Q3ZTU0MzIzNTgzNzRmODZmNjAxZmYzYzljOTFlZTRlMWZjYjAyZTViNmU5OThkMmU1OWUzMzYzYzIwYmE:7660c22f7e59fba0bfce676f666bc0bb81286e8594028c7d4f8715b7d8e48297"</span>  \
 -d <span class="hljs-string">'{                            
@@ -33,102 +99,93 @@ Replit Modelfarm: production-modelfarm<span class="hljs-selector-class">.replit<
     "</span>messages<span class="hljs-string">": [{"</span>role<span class="hljs-string">": "</span><span class="hljs-built_in">system</span><span class="hljs-string">", "</span>content<span class="hljs-string">": "</span>You are a helpful assistant.<span class="hljs-string">"}, {"</span>role<span class="hljs-string">": "</span>user<span class="hljs-string">", "</span>content<span class="hljs-string">": "</span>Hello!<span class="hljs-string">"}]
   }'</span>
 </code></pre>
-<p>And you&#39;ll get the standard API response from the service you&#39;re hitting against.</p>
-<p>Ole!! You just paid bitcoin to hit the API.</p>
-<p>Matador passes the request through exactly as if you were hitting against the actual API, replacing the L402 Authorization Header the client hits against matador with your API key. Clients pay you in Bitcoin, you pay the API service with your credit card.</p>
-<p>Matador is a WIP, use at your own risk (MIT LICENSE copied below)</p>
-<h2 id="getting-started">Getting Started</h2>
-<p>Here&#39;s how to get Matador up and running</p>
-<h3 id="prerequisites">Prerequisites</h3>
-<p>You need to have Rust installed: <a href="https://www.rust-lang.org/tools/install">https://www.rust-lang.org/tools/install</a></p>
-<p>Or just load this into Replit, the default configs from the checked in .replit and replit.nix work out of the box</p>
-<h3 id="clone-the-repository">Clone the repository</h3>
-<p>To clone the Matador repository to your local system, execute the following command in your terminal:</p>
-<pre><code class="lang-bash">git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/kodylow/matador-rs
+      <p>
+        And you&#39;ll get the standard API response from the service you&#39;re
+        hitting against.
+      </p>
+      <p>Ole!! You just paid bitcoin to hit the API.</p>
+      <p>
+        Matador passes the request through exactly as if you were hitting
+        against the actual API, replacing the L402 Authorization Header the
+        client hits against matador with your API key. Clients pay you in
+        Bitcoin, you pay the API service with your credit card.
+      </p>
+      <p>Matador is a WIP, use at your own risk (MIT LICENSE copied below)</p>
+      <h2 id="getting-started">Getting Started</h2>
+      <p>Here&#39;s how to get Matador up and running</p>
+      <h3 id="prerequisites">Prerequisites</h3>
+      <p>
+        You need to have Rust installed:
+        <a href="https://www.rust-lang.org/tools/install"
+          >https://www.rust-lang.org/tools/install</a
+        >
+      </p>
+      <p>
+        Or just load this into Replit, the default configs from the checked in
+        .replit and replit.nix work out of the box
+      </p>
+      <h3 id="clone-the-repository">Clone the repository</h3>
+      <p>
+        To clone the Matador repository to your local system, execute the
+        following command in your terminal:
+      </p>
+      <pre><code class="lang-bash">git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/kodylow/matador-rs
 </code></pre>
-<h3 id="configuration">Configuration</h3>
-<p>Post-cloning, navigate to the project root and create a .env file (or on Replit set these in Secrets). This file must include your API key, the API root, your Lightning address, and a Macaroon secret as follows:</p>
-<pre><code class="lang-dotenv"><span class="hljs-attr">API_KEY</span> = YOUR_OPENAI_API_KEY
+      <h3 id="configuration">Configuration</h3>
+      <p>
+        Post-cloning, navigate to the project root and create a .env file (or on
+        Replit set these in Secrets). This file must include your API key, the
+        API root, your Lightning address, and a Macaroon secret as follows:
+      </p>
+      <pre><code class="lang-dotenv"><span class="hljs-attr">API_KEY</span> = YOUR_OPENAI_API_KEY
 <span class="hljs-attr">API_ROOT</span> = <span class="hljs-string">"https://api.openai.com"</span>
 <span class="hljs-attr">SERVICE_LIGHTNING_ADDRESS</span> = <span class="hljs-string">"yourusername@getalby.com"</span>
 <span class="hljs-attr">SERVICE_MACAROON_SECRET</span> = <span class="hljs-string">"some-base65-secret-bytes-as-hex"</span>
 </code></pre>
-<p>To generate the macaroon secret you just need some random base64 bytes, you can use this command:</p>
-<pre><code><span class="hljs-symbol">openssl</span> rand -<span class="hljs-keyword">base64 </span><span class="hljs-number">32</span>
-</code></pre><p>You can change the pricing and endpoints as well, the current configuration is extremely conservative (will overcharge in bitcoin terms) and hardcodes a price of bitcoin at $28,000 until I get around to creating a bitcoin price service.</p>
-<h1 id="running-matador">Running Matador</h1>
-<p>To launch the server, execute the following command:</p>
-<pre><code class="lang-bash">cargo <span class="hljs-keyword">run</span><span class="bash"></span>
+      <p>
+        To generate the macaroon secret you just need some random base64 bytes,
+        you can use this command:
+      </p>
+      <pre><code><span class="hljs-symbol">openssl</span> rand -<span class="hljs-keyword">base64 </span><span class="hljs-number">32</span>
 </code></pre>
-<p>Olé! Your Matador server is now live, ready to process requests and exchange API key access for Bitcoin payments.</p>
-<h1 id="mit-license">MIT License</h1>
-<p>Copyright 2023 Kody Low</p>
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-<p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-
-
-
-<!-- <!DOCTYPE html>
-<html>
-  <head>
-    <title>Perplexity API Test</title>
-  </head>
-  <body>
-    <button id="apiButton">Get Answer</button>
-    <div id="responseDiv"></div>
-    <input type="text" id="ecashInput" placeholder="Enter eCash string here" />
-    <script>
-      document
-        .getElementById("apiButton")
-        .addEventListener("click", function () {
-          var ecash = document.getElementById("ecashInput").value;
-          var headers = {
-            "Content-Type": "application/json",
-          };
-          while (ecash.length % 4 !== 0) {
-            ecash += "=";
-          }
-          if (ecash) {
-            headers["X-Cashu"] = ecash;
-          }
-          fetch("http://localhost:8000/perplexity/chat/completions", {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({
-              model: "mistral-7b-instruct",
-              messages: [
-                {
-                  role: "system",
-                  content: "Be precise and concise.",
-                },
-                {
-                  role: "user",
-                  content: "How many stars are there in our galaxy?",
-                },
-              ],
-            }),
-          })
-            .then((response) => {
-              if (response.status === 402) {
-                let headers402 = {
-                  L402: response.headers.get("Www-Authenticate"),
-                  Cashu402: response.headers.get("X-Cashu"),
-                };
-                document.getElementById("responseDiv").innerText =
-                  JSON.stringify(headers402, null, 4);
-              } else {
-                return response.json();
-              }
-            })
-            .then((data) => {
-              if (data) {
-                document.getElementById("responseDiv").innerText =
-                  JSON.stringify(data, null, 2);
-              }
-            });
-        });
-    </script>
+      <p>
+        You can change the pricing and endpoints as well, the current
+        configuration is extremely conservative (will overcharge in bitcoin
+        terms) and hardcodes a price of bitcoin at $28,000 until I get around to
+        creating a bitcoin price service.
+      </p>
+      <h1 id="running-matador">Running Matador</h1>
+      <p>To launch the server, execute the following command:</p>
+      <pre><code class="lang-bash">cargo <span class="hljs-keyword">run</span><span class="bash"></span>
+</code></pre>
+      <p>
+        Olé! Your Matador server is now live, ready to process requests and
+        exchange API key access for Bitcoin payments.
+      </p>
+      <h1 id="mit-license">MIT License</h1>
+      <p>Copyright 2023 Kody Low</p>
+      <p>
+        Permission is hereby granted, free of charge, to any person obtaining a
+        copy of this software and associated documentation files (the
+        “Software”), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, sublicense, and/or sell copies of the Software, and to
+        permit persons to whom the Software is furnished to do so, subject to
+        the following conditions:
+      </p>
+      <p>
+        The above copyright notice and this permission notice shall be included
+        in all copies or substantial portions of the Software.
+      </p>
+      <p>
+        THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+        OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+        IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+        CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+        TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+        SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+      </p>
+    </div>
   </body>
 </html>
- -->
