@@ -80,26 +80,32 @@ pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) ->
     Ok(next.run(req).await)
 }
 
+/// Inserts the bearer token into the Authorization header of the request.
 pub fn bearer_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_bearer_header(req, auth);
 }
 
+/// Inserts the basic auth credentials into the Authorization header of the request.
 pub fn basic_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_basic_header(req, auth);
 }
 
+/// Inserts the API key into the x-api-key header of the request.
 pub fn x_api_key_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_x_api_key_header(req, auth);
 }
 
+/// Adds the API key as a query parameter to the request.
 pub fn key_query_param_auth<B>(req: &mut Request<B>, auth: &str) {
     add_key_query_param(req, auth);
 }
 
+/// Inserts the token into the Authorization header of the request.
 pub fn token_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_auth_token_header(req, auth);
 }
 
+/// Inserts the API key into the x-api-key header and adds the anthropic-version header to the request.
 pub fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
     insert_x_api_key_header(req, auth);
     req.headers_mut().insert(
@@ -108,6 +114,7 @@ pub fn anthropic_auth<B>(req: &mut Request<B>, auth: &str) {
     );
 }
 
+/// Inserts the API key into the Ocp-Apim-Subscription-Key header of the request.
 pub fn bing_auth<B>(req: &mut Request<B>, auth: &str) {
     req.headers_mut().insert(
         HeaderName::from_str("Ocp-Apim-Subscription-Key").unwrap(),
