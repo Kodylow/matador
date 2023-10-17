@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use tracing::debug;
+use tracing::{debug, error};
 
 use crate::model;
 
@@ -31,6 +31,8 @@ impl From<model::Error> for Error {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         debug!("{:<12} - model::Error {self:?}", "INTO_RES");
+
+        error!{"An internal server error occurred: {:#?}", self};
 
         // Create a placeholder Axum response.
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();

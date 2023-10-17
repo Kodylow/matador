@@ -33,7 +33,7 @@ pub async fn add_auth<B: std::fmt::Debug>(mut req: Request<B>, next: Next<B>) ->
         };
 
         let key = replit_config.get_key();
-
+            
         bearer_auth(&mut req, &key);
 
         return Ok(next.run(req).await);
