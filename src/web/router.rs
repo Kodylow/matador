@@ -8,10 +8,17 @@ use tracing::info;
 use super::mw::mw_add_api_auth::add_auth;
 use super::mw::mw_l402::mw_402;
 use crate::config::apis::{apis_config, ApiParams, ApisConfig};
-use crate::error::{Error, Result};
 use crate::web::routes_static;
+use anyhow::{Error, Result};
 use http::{header, HeaderValue, Method};
 use tower_http::cors::{Any, CorsLayer};
+
+fn log_error<T, E: std::fmt::Debug>(result: Result<T, E>) -> Result<T, E> {
+    if let Err(ref e) = result {
+        info!("Error: {:?}", e);
+    }
+    result
+}
 
 pub fn setup_router() -> Result<Router> {
     let cors = CorsLayer::new()
@@ -21,8 +28,8 @@ pub fn setup_router() -> Result<Router> {
         .expose_headers(Any);
 
     let mut router = Router::new();
-    let router = set_api_proxy_routes(router)?;
-    let router = set_l402_wrapper(router)?;
+    let router = log_error(set_api_proxy_routes(router))?;
+    let router = log_error(set_l402_wrapper(router))?;
     let router = router
         .layer(cors)
         .fallback_service(routes_static::serve_dir());
@@ -43,9 +50,7 @@ fn set_api_proxy_routes(mut router: Router) -> Result<Router> {
     let params = apis_config().get_params_per_api_keys_set();
 
     if params.is_empty() {
-        return Err(Error::RouterFailToSetRoutes(
-            "No routes set, check environment variables".into(),
-        ));
+        return Err(Error::msg("No API keys set"));
     }
 
     for p in &params {

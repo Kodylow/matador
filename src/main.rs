@@ -10,14 +10,13 @@ use crate::model::ModelManager;
 mod config;
 mod crypt;
 mod ctx;
-mod error;
 mod lightning;
 mod log;
 mod model;
 mod utils;
 mod web;
 
-pub use self::error::{Error, Result};
+pub use anyhow::{Error, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {

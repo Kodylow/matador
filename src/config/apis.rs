@@ -14,7 +14,6 @@ use tracing::{debug, info};
 use super::replit::{get_optional_replit, ReplitApiParams};
 use crate::config::config::Config;
 use crate::config::get_optional_env;
-use crate::error::Result;
 use crate::utils::{
     add_key_query_param, insert_auth_basic_header, insert_auth_bearer_header,
     insert_auth_token_header, insert_x_api_key_header,
