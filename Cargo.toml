@@ -47,5 +47,5 @@ tower = "0.4.13"
 futures-util = "0.3.28"
 data-encoding = "2.4.0"
 base64-url = "2.0.0"
-moksha-core = { git = "https://github.com/ngutech21/moksha.git", branch = "master" }
+moksha-core = "0.1.2"
 http = "0.2.9"
